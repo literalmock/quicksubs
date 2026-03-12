@@ -1,0 +1,96 @@
+---
+const plans = [
+  {
+    name: 'Free',
+    price: '$0',
+    period: '/mo',
+    description: 'Try it out with limited usage',
+    features: ['5 videos per month', '10 min max length', 'Standard processing', 'Email support'],
+    cta: 'Get Started',
+    highlighted: false,
+  },
+  {
+    name: 'Pro',
+    price: '$19',
+    period: '/mo',
+    description: 'For creators and small teams',
+    features: ['50 videos per month', '60 min max length', 'Priority processing', 'Multiple export formats', 'Custom subtitle styles', 'Priority support'],
+    cta: 'Start Pro Trial',
+    highlighted: true,
+  },
+  {
+    name: 'Enterprise',
+    price: '$79',
+    period: '/mo',
+    description: 'For agencies and large teams',
+    features: ['Unlimited videos', 'No length limits', 'Fastest processing', 'API access', 'Custom branding', 'SSO & team management', 'Dedicated support'],
+    cta: 'Contact Sales',
+    highlighted: false,
+  },
+];
+---
+
+<section id="pricing" class="py-24 relative">
+  <div class="absolute right-0 top-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-primary-600/8 rounded-full blur-[150px] pointer-events-none"></div>
+
+  <div class="relative max-w-7xl mx-auto px-6">
+    <div class="text-center mb-16">
+      <p class="text-primary-400 text-sm font-medium uppercase tracking-widest mb-3">Pricing</p>
+      <h2 class="text-4xl md:text-5xl font-bold">
+        Simple, transparent
+        <span class="bg-gradient-to-r from-primary-400 to-primary-600 bg-clip-text text-transparent">pricing</span>
+      </h2>
+      <p class="text-surface-400 text-lg mt-4 max-w-xl mx-auto">
+        Start for free, upgrade when you're ready. No hidden fees.
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+      {plans.map((plan) => (
+        <div
+          class={`relative rounded-2xl p-8 transition-all duration-300 hover:-translate-y-1 ${
+            plan.highlighted
+              ? 'bg-gradient-to-b from-primary-600/20 to-surface-900 border-2 border-primary-500/50 shadow-xl shadow-primary-600/10'
+              : 'bg-surface-900/80 border border-surface-700 hover:border-surface-600'
+          }`}
+        >
+          {plan.highlighted && (
+            <div class="absolute -top-4 left-1/2 -translate-x-1/2">
+              <span class="px-4 py-1.5 rounded-full bg-gradient-to-r from-primary-600 to-primary-500 text-white text-xs font-semibold">
+                Most Popular
+              </span>
+            </div>
+          )}
+
+          <h3 class="text-lg font-semibold mb-1">{plan.name}</h3>
+          <p class="text-surface-500 text-sm mb-6">{plan.description}</p>
+
+          <div class="mb-6">
+            <span class="text-4xl font-bold">{plan.price}</span>
+            <span class="text-surface-500">{plan.period}</span>
+          </div>
+
+          <ul class="space-y-3 mb-8">
+            {plan.features.map((feature) => (
+              <li class="flex items-center gap-3 text-sm">
+                <span class={`w-5 h-5 rounded-full flex items-center justify-center text-xs ${plan.highlighted ? 'bg-primary-500/20 text-primary-400' : 'bg-surface-700 text-surface-400'}`}>✓</span>
+                <span class="text-surface-300">{feature}</span>
+              </li>
+            ))}
+          </ul>
+
+          <a
+            href="http://localhost:5173/signup"
+            class={`block text-center py-3 rounded-xl font-medium text-sm transition-all duration-200 ${
+              plan.highlighted
+                ? 'bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-500 hover:to-primary-400 text-white shadow-lg shadow-primary-600/25'
+                : 'border border-surface-600 hover:border-surface-500 text-surface-300 hover:text-white hover:bg-surface-800/50'
+            }`}
+          >
+            {plan.cta}
+          </a>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
