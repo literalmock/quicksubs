@@ -31,10 +31,8 @@ export const AuthProvider = ({ children }) => {
     return data;
   };
 
-  const signup = async (name, email, password, betaCode = '') => {
-    const payload = { name, email, password };
-    if (betaCode?.trim()) payload.betaCode = betaCode.trim();
-    const { data } = await api.post('/auth/signup', payload);
+  const signup = async (name, email, password) => {
+    const { data } = await api.post('/auth/signup', { name, email, password });
     setUser(data.user);
     return data;
   };

@@ -170,8 +170,7 @@ const UploadZone = ({ onUploadComplete }) => {
 
       onUploadComplete?.(data.video);
     } catch (err) {
-      const apiMessage = err?.response?.data?.message;
-      setError(apiMessage || err.message || 'Upload failed');
+      setError(err.message || 'Upload failed');
     } finally {
       setUploading(false);
       setPhase('');
@@ -191,8 +190,6 @@ const UploadZone = ({ onUploadComplete }) => {
 
   const confirmLanguageAndUpload = async () => {
     if (!pendingFile || uploading) return;
-    // Close chooser immediately so users can see the upload progress state.
-    setShowLanguagePopup(false);
     await startUpload(pendingFile, language);
   };
 

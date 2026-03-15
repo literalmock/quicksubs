@@ -20,7 +20,7 @@ const BATCH_SIZE = 40;
 const cleanRomanText = (value) => {
   const text = String(value || '');
   return text
-    .replace(/[\u200B-\u200D\uFEFF]/g, '')
+    .replace(/[^\x20-\x7E]/g, ' ')
     .replace(/([a-zA-Z])\1{3,}/g, '$1$1')
     .replace(/\s+/g, ' ')
     .replace(/\s+([,.!?;:])/g, '$1')
@@ -118,10 +118,6 @@ const refineBatch = async (captions, language) => {
 
 export const refineCaptions = async (captions, language = 'hinglish') => {
   if (!Array.isArray(captions) || captions.length === 0) return captions;
-  if (language === 'hinglish') {
-    // Groq chat cleanup can rewrite Hinglish semantics; keep ASR wording stable.
-    return captions.map((c) => ({ ...c, text: cleanRomanText(c.text) }));
-  }
   if (!client) return captions;
 
   try {

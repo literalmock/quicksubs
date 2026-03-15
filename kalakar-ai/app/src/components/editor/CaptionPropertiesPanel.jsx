@@ -1,4 +1,4 @@
-import TextStylePanel from '../../editor/components/TextStylePanel';
+import { CAPTION_THEMES, THEME_KEYS } from '../../utils/captionThemes';
 
 const FONTS = ['Poppins', 'Inter', 'Arial', 'Helvetica', 'Georgia', 'Verdana', 'Courier New'];
 
@@ -87,25 +87,56 @@ const CaptionPropertiesPanel = ({
         <h3 className="text-xs font-semibold text-surface-400 uppercase tracking-wider">Style</h3>
       </div>
 
-      {/* Text style presets */}
-      <TextStylePanel
-        activeStyleId={st.theme || 'classic'}
-        onSelectStyle={(preset) => {
-          onUpdateStyle(subtitle.id, {
-            theme: preset.id,
-            fontFamily: preset.fontFamily.split(',')[0].replace(/['"]/g, '').trim(),
-            fontSize: preset.fontSize,
-            color: preset.color,
-            stroke: preset.stroke,
-            textTransform: preset.textTransform,
-            letterSpacing: preset.letterSpacing,
-            lineHeight: preset.lineHeight,
-            background: preset.background,
-            shadow: preset.shadow,
-            animation: preset.animation,
-          });
-        }}
-      />
+      {/* Theme selector */}
+      <div>
+        <p className="text-xs text-surface-400 mb-2">Caption Theme</p>
+        <div className="grid grid-cols-3 gap-2">
+          {THEME_KEYS.map((key) => {
+            const theme = CAPTION_THEMES[key];
+            const isActive = (st.theme || 'classic') === key;
+            return (
+              <button
+                key={key}
+                onClick={() => {
+                  const t = CAPTION_THEMES[key];
+                  onUpdateStyle(subtitle.id, {
+                    theme: key,
+                    fontSize: t.fontSize,
+                    color: t.color,
+                    stroke: t.stroke,
+                    fontFamily: key === 'classic' ? 'Poppins' : (key === 'viral' ? 'Anton' : 'Impact'),
+                  });
+                }}
+                className={`relative rounded-lg border-2 py-3 px-1 flex flex-col items-center gap-1 transition-all ${
+                  isActive
+                    ? 'border-primary-500 bg-primary-600/15'
+                    : 'border-surface-700 bg-surface-800 hover:border-surface-500'
+                }`}
+              >
+                {/* Mini preview text */}
+                <span
+                  style={{
+                    fontFamily: theme.fontFamily,
+                    fontSize: '11px',
+                    fontWeight: theme.fontWeight || '700',
+                    color: theme.color,
+                    WebkitTextStroke: `0.5px ${theme.stroke}`,
+                    paintOrder: 'stroke fill',
+                    textTransform: theme.textTransform || 'none',
+                    lineHeight: 1,
+                    ...(theme.background
+                      ? { background: theme.background, padding: '1px 4px', borderRadius: 3 }
+                      : {}),
+                  }}
+                >
+                  Aa
+                </span>
+                <span className="text-[9px] text-surface-400">{theme.label}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
 
       {/* Font family */}
       <Field label="Font Family">

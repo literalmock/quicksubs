@@ -1,6 +1,5 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
-import { getDailyCreditsForPlan } from '../config/plans.js';
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -22,34 +21,6 @@ const userSchema = new mongoose.Schema({
     required: [true, 'Password is required'],
     minlength: 6,
     select: false, // never return password by default
-  },
-  role: {
-    type: String,
-    enum: ['user', 'admin'],
-    default: 'user',
-  },
-  plan: {
-    type: String,
-    enum: ['free', 'beta', 'pro'],
-    default: 'free',
-  },
-  credits: {
-    type: Number,
-    default: () => getDailyCreditsForPlan('free'),
-    min: 0,
-  },
-  betaAccess: {
-    type: Boolean,
-    default: false,
-  },
-  videosProcessed: {
-    type: Number,
-    default: 0,
-    min: 0,
-  },
-  lastCreditResetAt: {
-    type: Date,
-    default: Date.now,
   },
 }, { timestamps: true });
 

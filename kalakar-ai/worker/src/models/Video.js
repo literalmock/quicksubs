@@ -24,22 +24,6 @@ const videoSchema = new mongoose.Schema({
   originalPublicId: {
     type: String,
   },
-  previewUrl: {
-    type: String,
-    default: null,
-  },
-  previewPublicId: {
-    type: String,
-    default: null,
-  },
-  audioUrl: {
-    type: String,
-    default: null,
-  },
-  audioPublicId: {
-    type: String,
-    default: null,
-  },
   outputUrl: {
     type: String,
     default: null,
@@ -59,11 +43,6 @@ const videoSchema = new mongoose.Schema({
   subtitleAss: {
     type: String,
     default: null,
-  },
-  transcriptionEngine: {
-    type: String,
-    enum: ['cloudinary'],
-    default: 'cloudinary',
   },
   status: {
     type: String,
