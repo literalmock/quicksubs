@@ -1,0 +1,9 @@
+# Large files
+*.tar.gz
+*.zip
+
+# OS
+.DS_Store
+
+# Uploads (videos)
+uploads/
