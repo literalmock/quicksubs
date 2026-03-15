@@ -18,6 +18,7 @@ const VideoCanvas = ({
   const containerRef = useRef(null);
   const [containerSize, setContainerSize] = useState({ width: 800, height: 450 });
   const [nativeSize, setNativeSize] = useState({ width: 0, height: 0 });
+  const [loadError, setLoadError] = useState('');
 
   // Track container size
   useEffect(() => {
@@ -39,6 +40,7 @@ const VideoCanvas = ({
       const vw = v.videoWidth || REF_W;
       const vh = v.videoHeight || REF_H;
       setNativeSize({ width: vw, height: vh });
+      setLoadError('');
       onLoadedMetadata(vw, vh);
     }
   }, [onLoadedMetadata, videoRef]);
@@ -69,7 +71,10 @@ const VideoCanvas = ({
         ref={videoRef}
         src={videoSrc}
         className="absolute inset-0 w-full h-full object-contain"
+        crossOrigin="use-credentials"
+        preload="metadata"
         onLoadedMetadata={handleMeta}
+        onError={() => setLoadError('Preview could not be loaded. Check the video source or auth session.')}
         onPause={onPause}
         onEnded={onEnded}
         playsInline
@@ -101,6 +106,12 @@ const VideoCanvas = ({
             fontScale={fontScale}
             onUpdateStyle={onUpdateStyle}
           />
+        </div>
+      )}
+
+      {loadError && (
+        <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/70 px-6 text-center">
+          <p className="text-sm text-surface-300">{loadError}</p>
         </div>
       )}
     </div>

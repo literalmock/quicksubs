@@ -1,73 +1,227 @@
-import OpenAI from 'openai';
 import fs from 'fs';
+import path from 'path';
+import { buildWhisperParams, transcribeGroqChunk } from './groqTranscriber.js';
+import { transcribeLocalChunk } from './localWhisperTranscriber.js';
+import { splitAudioIntoChunks } from './audioChunker.js';
+import { processChunksWithRetry } from './transcriptionQueue.js';
+import { mergeChunkTranscriptions } from './captionMerger.js';
+import { formatCaptionsFromSegments } from './captionFormatter.js';
 
-const client = new OpenAI({
-  apiKey: process.env.GROQ_API_KEY,
-  baseURL: 'https://api.groq.com/openai/v1',
-});
+const CHUNK_SECONDS = 45;
+const RECOVERY_CHUNK_SECONDS = 24;
+const RECOVERY_OVERLAP_SECONDS = 3;
+const GROQ_CONCURRENCY = 1;
+const AZURE_OPENAI_API_VERSION = process.env.AZURE_OPENAI_API_VERSION || '2024-06-01';
 
-const MODEL = 'whisper-large-v3';
+const getAzureConfig = () => {
+  const endpoint = String(process.env.AZURE_OPENAI_ENDPOINT || '').trim();
+  const apiKey = String(process.env.AZURE_OPENAI_API_KEY || '').trim();
+  const deployment = String(process.env.AZURE_OPENAI_WHISPER_DEPLOYMENT || '').trim();
+  return {
+    endpoint: endpoint.replace(/\/$/, ''),
+    apiKey,
+    deployment,
+  };
+};
 
-/**
- * Returns the Whisper API params for the given language.
- */
-const whisperParams = (language) => {
-  switch (language) {
-    case 'english':
-      return {
-        language: 'en',
-        prompt: 'The following audio is in English. Output natural English text only.',
-      };
-    case 'hindi':
-      return {
-        language: 'hi',
-        prompt:
-          'This audio is in Hindi. Output Hindi speech in Roman/Latin letters only. ' +
-          'Do not use Devanagari script. Do not translate meaning to English. Keep wording faithful to speech.',
-      };
-    case 'hinglish':
-    default:
-      // For mixed Hindi+English speech, hinting 'hi' plus task:'transcribe'
-      // reduces meaning-translation into English while still preserving English words.
-      return {
-        language: 'hi',
-        prompt:
-          'Hinglish conversation mixing Hindi and English. TRANSCRIBE exactly what is spoken; do not translate meaning. ' +
-          'Output everything in Roman/Latin letters only. Keep English words exactly as spoken in English. ' +
-          'For Hindi speech, write Hindi pronunciation in Roman letters (example: hame aage badhna hai). ' +
-          'Do not use Devanagari. Do not translate Hindi phrases into English meaning. ' +
-          'Examples: yaar, bhai, kya, hai, nahi, aur, chalte hain, kaise, theek hai, abhi, phir, toh, ' +
-          'matlab, bilkul, achha, suno, dekho, kal, aaj, zyada, thoda.',
-      };
+const hasAzureConfig = () => {
+  const { endpoint, apiKey, deployment } = getAzureConfig();
+  return Boolean(endpoint && apiKey && deployment);
+};
+
+const removePathSafe = (targetPath) => {
+  if (!targetPath || !fs.existsSync(targetPath)) return;
+  try {
+    fs.rmSync(targetPath, { recursive: true, force: true });
+  } catch {
+    // best-effort cleanup
   }
 };
 
-/**
- * Transcribes audio using Groq Whisper with word + segment timestamps.
- * Returns the raw verbose_json result for downstream caption segmentation.
- *
- * @param {string} audioPath – path to the audio file
- * @param {'english'|'hindi'|'hinglish'} language – audio language hint
- * @returns {Promise<{ text: string, words: Array, segments: Array }>}
- */
-export const transcribeAudio = async (audioPath, language = 'hinglish') => {
-  const params = whisperParams(language);
-  console.log(`🧠 Sending audio to Groq Whisper [language: ${language}]…`);
+const parseJsonSafe = async (response) => {
+  const bodyText = await response.text();
+  try {
+    return JSON.parse(bodyText || '{}');
+  } catch {
+    return { error: { message: bodyText || 'Unknown response parse error' } };
+  }
+};
 
-  const result = await client.audio.transcriptions.create({
-    file: fs.createReadStream(audioPath),
-    model: MODEL,
-    temperature: 0,
-    response_format: 'verbose_json',
-    timestamp_granularities: ['word', 'segment'],
-    ...params,
+const isLikelyLargeTrack = (chunkCount) => chunkCount >= 8;
+
+const shouldRunRecoveryPass = ({ chunks, merged, captions, manualReview }) => {
+  if (!isLikelyLargeTrack(chunks.length)) return false;
+  if (manualReview.length > 0) return true;
+
+  const textLength = String(merged?.text || '').trim().length;
+  const segmentCount = Array.isArray(merged?.segments) ? merged.segments.length : 0;
+  const captionCount = Array.isArray(captions) ? captions.length : 0;
+
+  const sparseSegments = segmentCount < Math.max(10, Math.floor(chunks.length * 0.85));
+  const sparseCaptions = captionCount < Math.max(10, Math.floor(chunks.length * 0.95));
+  const sparseText = textLength < chunks.length * 35;
+
+  return sparseSegments || sparseCaptions || sparseText;
+};
+
+const scorePass = ({ merged, captions, manualReview }) => {
+  const textLength = String(merged?.text || '').trim().length;
+  const segmentCount = Array.isArray(merged?.segments) ? merged.segments.length : 0;
+  const captionCount = Array.isArray(captions) ? captions.length : 0;
+  return (captionCount * 3) + (segmentCount * 2) + Math.min(textLength / 20, 300) - (manualReview.length * 200);
+};
+
+const runPass = async ({
+  audioPath,
+  transcribeChunk,
+  chunkSeconds,
+  overlapSeconds,
+  concurrency,
+}) => {
+  const { chunkDir, chunks } = await splitAudioIntoChunks(audioPath, chunkSeconds, overlapSeconds);
+
+  try {
+    const { results, manualReview } = await processChunksWithRetry({
+      chunks,
+      processChunk: transcribeChunk,
+      concurrency,
+    });
+
+    const merged = mergeChunkTranscriptions(results);
+    const captions = formatCaptionsFromSegments(merged.segments);
+
+    return {
+      merged,
+      captions,
+      manualReview,
+      chunks,
+    };
+  } finally {
+    removePathSafe(chunkDir);
+  }
+};
+
+const transcribeAzureChunk = async (audioPath, params) => {
+  const { endpoint, apiKey, deployment } = getAzureConfig();
+  const url = `${endpoint}/openai/deployments/${deployment}/audio/transcriptions?api-version=${AZURE_OPENAI_API_VERSION}`;
+
+  const bytes = fs.readFileSync(audioPath);
+  const form = new FormData();
+  form.append('file', new Blob([bytes], { type: 'audio/mpeg' }), path.basename(audioPath));
+  form.append('response_format', 'verbose_json');
+  form.append('temperature', '0');
+  if (params?.language) form.append('language', params.language);
+  if (params?.prompt) form.append('prompt', params.prompt);
+  form.append('timestamp_granularities[]', 'word');
+  form.append('timestamp_granularities[]', 'segment');
+
+  let response = await fetch(url, {
+    method: 'POST',
+    headers: { 'api-key': apiKey },
+    body: form,
   });
 
-  console.log(`🧠 Transcription complete — ${result.segments?.length ?? 0} segments, ${result.words?.length ?? 0} words`);
+  if (!response.ok) {
+    const failure = await parseJsonSafe(response);
+    const message = String(failure?.error?.message || '').toLowerCase();
+
+    if (message.includes('timestamp_granularities')) {
+      const retryForm = new FormData();
+      retryForm.append('file', new Blob([bytes], { type: 'audio/mpeg' }), path.basename(audioPath));
+      retryForm.append('response_format', 'verbose_json');
+      retryForm.append('temperature', '0');
+      if (params?.language) retryForm.append('language', params.language);
+      if (params?.prompt) retryForm.append('prompt', params.prompt);
+
+      response = await fetch(url, {
+        method: 'POST',
+        headers: { 'api-key': apiKey },
+        body: retryForm,
+      });
+      if (!response.ok) {
+        const retryFailure = await parseJsonSafe(response);
+        throw new Error(retryFailure?.error?.message || 'Azure transcription failed');
+      }
+    } else {
+      throw new Error(failure?.error?.message || 'Azure transcription failed');
+    }
+  }
+
+  const data = await parseJsonSafe(response);
+  return {
+    text: data.text || '',
+    words: Array.isArray(data.words) ? data.words : [],
+    segments: Array.isArray(data.segments) ? data.segments : [],
+  };
+};
+
+/**
+ * @param {string} audioPath
+ * @param {'english'|'hindi'|'hinglish'} language
+ * @param {'groq'|'azure'|'local'} provider
+ * @returns {Promise<{ text: string, words: Array, segments: Array, captions: Array, manualReview: Array }>}
+ */
+export const transcribeAudio = async (audioPath, language = 'hinglish', provider = 'groq') => {
+  const params = buildWhisperParams(language);
+
+  // Resolve provider: local | azure | groq (default)
+  let wantedProvider = 'groq';
+  if (provider === 'local') wantedProvider = 'local';
+  else if (provider === 'azure') wantedProvider = 'azure';
+
+  if (wantedProvider === 'azure' && !hasAzureConfig()) {
+    throw new Error('Azure transcription requested but AZURE_OPENAI_ENDPOINT, AZURE_OPENAI_API_KEY, or AZURE_OPENAI_WHISPER_DEPLOYMENT is missing');
+  }
+
+  let transcribeChunk;
+  if (wantedProvider === 'local') {
+    transcribeChunk = (chunk) => transcribeLocalChunk(chunk.file, params);
+  } else if (wantedProvider === 'azure') {
+    transcribeChunk = (chunk) => transcribeAzureChunk(chunk.file, params);
+  } else {
+    transcribeChunk = (chunk) => transcribeGroqChunk(chunk.file, params);
+  }
+
+  console.log(`Starting chunked transcription via ${wantedProvider} [language: ${language}]`);
+
+  // Local: 1 (CPU handles one at a time), Azure: 3, Groq: 1
+  const defaultConcurrency = wantedProvider === 'azure' ? 3 : 1;
+
+  const primary = await runPass({
+    audioPath,
+    transcribeChunk,
+    chunkSeconds: CHUNK_SECONDS,
+    overlapSeconds: 0,
+    concurrency: defaultConcurrency,
+  });
+
+  if (primary.manualReview.length) {
+    console.warn(`Manual review needed for ${primary.manualReview.length} chunk(s) in primary pass`);
+  }
+
+  let chosen = primary;
+  if (shouldRunRecoveryPass(primary)) {
+    console.warn('⚠️ Low-confidence large transcription detected; running recovery pass with overlapped chunks');
+
+    const recovery = await runPass({
+      audioPath,
+      transcribeChunk,
+      chunkSeconds: RECOVERY_CHUNK_SECONDS,
+      overlapSeconds: RECOVERY_OVERLAP_SECONDS,
+      concurrency: wantedProvider === 'azure' ? 2 : 1,
+    });
+
+    if (scorePass(recovery) > scorePass(primary)) {
+      console.log('✅ Recovery pass selected for final captions');
+      chosen = recovery;
+    } else {
+      console.log('ℹ️ Primary pass retained after recovery comparison');
+    }
+  }
 
   return {
-    text: result.text,
-    words: result.words ?? [],
-    segments: result.segments ?? [],
+    ...chosen.merged,
+    captions: chosen.captions,
+    manualReview: chosen.manualReview,
   };
 };

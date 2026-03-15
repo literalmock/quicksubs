@@ -42,6 +42,25 @@ const getWordCoverage = (words, segments) => {
   return { hasWords: true, lastWordEnd, lastSegEnd, ratio };
 };
 
+const textTokenCount = (value) =>
+  String(value || '')
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .length;
+
+const getTextCoverage = (words, segments) => {
+  const wordTokenCount = Array.isArray(words)
+    ? words.reduce((sum, word) => sum + textTokenCount(word.word), 0)
+    : 0;
+  const segmentTokenCount = Array.isArray(segments)
+    ? segments.reduce((sum, segment) => sum + textTokenCount(segment.text), 0)
+    : 0;
+
+  const ratio = segmentTokenCount > 0 ? wordTokenCount / segmentTokenCount : 1;
+  return { wordTokenCount, segmentTokenCount, ratio };
+};
+
 const endsSentence = (token) => /[.!?]$/.test(String(token || '').trim());
 
 const clampCaption = (caption) => {
@@ -279,11 +298,23 @@ export const captionsToSrt = (captions) => {
 export const segmentCaptions = (transcriptionResult) => {
   const { words = [], segments = [] } = transcriptionResult;
   const coverage = getWordCoverage(words, segments);
+  const textCoverage = getTextCoverage(words, segments);
+
+  // When word-level timestamps are sparse or text alignment is weak,
+  // segment text is usually more complete than word tokens.
+  // Prefer segment mode to avoid dropped subtitle lines.
+  const shouldPreferSegments =
+    !coverage.hasWords
+    || coverage.ratio < 0.86
+    || (segments.length > 0 && textCoverage.ratio < 0.72);
 
   // ── Pure segment mode (no word timestamps available) ─────────────────────
-  if (!coverage.hasWords) {
+  if (shouldPreferSegments) {
     const captions = mergeCaptions(segmentsToCaptions(segments));
-    console.log('📝 Segment-level captions (word timestamps not available)');
+    console.log(
+      '📝 Segment-level captions fallback '
+      + `(wordTimeCoverage=${coverage.ratio.toFixed(2)}, textCoverage=${textCoverage.ratio.toFixed(2)})`,
+    );
     return { captions, srt: captionsToSrt(captions) };
   }
 

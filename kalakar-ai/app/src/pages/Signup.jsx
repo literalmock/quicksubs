@@ -6,6 +6,7 @@ const Signup = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [betaCode, setBetaCode] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { signup } = useAuth();
@@ -16,7 +17,7 @@ const Signup = () => {
     setError('');
     setLoading(true);
     try {
-      await signup(name, email, password);
+      await signup(name, email, password, betaCode);
       navigate('/dashboard');
     } catch (err) {
       setError(err.response?.data?.message || 'Signup failed');
@@ -77,6 +78,17 @@ const Signup = () => {
                 minLength={6}
                 className="w-full px-4 py-3 bg-surface-900 border border-surface-600 rounded-xl text-white text-sm placeholder-surface-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
                 placeholder="Min 6 characters"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-surface-300 mb-2">Beta Invite Code (optional)</label>
+              <input
+                type="text"
+                value={betaCode}
+                onChange={(e) => setBetaCode(e.target.value)}
+                className="w-full px-4 py-3 bg-surface-900 border border-surface-600 rounded-xl text-white text-sm placeholder-surface-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                placeholder="e.g. BETA100"
               />
             </div>
 

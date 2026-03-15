@@ -1,5 +1,6 @@
 import { useRef } from 'react';
-import { CAPTION_THEMES, splitToWordChunks } from '../../utils/captionThemes';
+import { splitToWordChunks } from '../../utils/captionThemes';
+import { resolveCaptionRenderStyle } from '../../utils/subtitles';
 
 /**
  * HTML/CSS subtitle overlay — renders captions with:
@@ -18,25 +19,30 @@ const SubtitleOverlay = ({ subtitle, containerWidth, containerHeight, fontScale 
   if (!subtitle) return null;
 
   const st = subtitle.style || {};
-  const theme = CAPTION_THEMES[st.theme] || CAPTION_THEMES.classic;
+  const resolved = resolveCaptionRenderStyle(st);
 
   // fontSize / color / stroke / fontFamily are synced into st when theme is selected,
   // so read directly from st for both live preview and export consistency.
-  const fontSize = Math.max(10, Math.round((st.fontSize ?? theme.fontSize) * fontScale));
-  const strokeWidth = Math.max(1, (theme.strokeWidth ?? 2) * fontScale);
-  const textColor = st.color ?? theme.color;
-  const strokeColor = st.stroke ?? theme.stroke;
-  // Build CSS font-family: use the bare st.fontFamily name + theme's full fallback stack
+  const fontSize = Math.max(10, Math.round(resolved.fontSize * fontScale));
+  const strokeWidth = resolved.hasBox ? 0 : Math.max(1, 1.2 * fontScale);
+  const textColor = resolved.color;
+  const strokeColor = resolved.stroke;
+  const textTransform = resolved.textTransform;
+  const letterSpacing = resolved.letterSpacing;
+  const lineHeight = resolved.lineHeight;
+  const shadow = resolved.shadowEnabled ? resolved.shadow : 'none';
+  const background = resolved.backgroundColor;
+
+  // Build CSS font-family: use the bare st.fontFamily name + preset's full fallback stack
   const fontFamily = st.fontFamily
-    ? `"${st.fontFamily}", ${theme.fontFamily}`
-    : theme.fontFamily;
+    ? `"${st.fontFamily}", ${resolved.fontFamily}`
+    : resolved.fontFamily;
 
   const rawText = subtitle.text || '';
-  const displayText =
-    theme.textTransform === 'uppercase' ? rawText.toUpperCase() : rawText;
+  const displayText = textTransform === 'uppercase' ? rawText.toUpperCase() : rawText;
 
-  const lines = theme.wordSplit
-    ? splitToWordChunks(displayText, theme.wordsPerLine ?? 2)
+  const lines = textTransform === 'uppercase'
+    ? splitToWordChunks(displayText, 2)
     : [displayText];
 
   // Position relative to the container (matches video display area)
@@ -74,26 +80,26 @@ const SubtitleOverlay = ({ subtitle, containerWidth, containerHeight, fontScale 
   const lineStyle = {
     fontFamily,
     fontSize: `${fontSize}px`,
-    fontWeight: theme.fontWeight || '700',
+    fontWeight: '800',
     color: textColor,
     WebkitTextStroke: `${strokeWidth}px ${strokeColor}`,
     paintOrder: 'stroke fill',
-    textTransform: theme.textTransform || 'none',
+    textTransform,
     textAlign: 'center',
-    letterSpacing: theme.letterSpacing || '0px',
-    lineHeight: 1.1,
+    letterSpacing,
+    lineHeight,
     display: 'block',
     userSelect: 'none',
     whiteSpace: 'nowrap',
-    textShadow: '0 2px 10px rgba(0,0,0,0.6)',
-    ...(theme.background
+    textShadow: shadow,
+    ...(background
       ? {
-          background: theme.background,
+          background,
           padding: `${Math.round(3 * fontScale)}px ${Math.round(10 * fontScale)}px`,
           borderRadius: `${Math.round(4 * fontScale)}px`,
           marginBottom: `${Math.round(4 * fontScale)}px`,
           WebkitTextStroke: `${strokeWidth}px ${strokeColor}`,
-          textShadow: 'none',
+          textShadow: shadow,
         }
       : { marginBottom: `${Math.round(2 * fontScale)}px` }),
   };

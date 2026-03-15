@@ -1,5 +1,8 @@
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
+import BetaCode from '../models/BetaCode.js';
+import { getDailyCreditsForPlan } from '../config/plans.js';
+import { ensurePlanUsageState, isBetaUser } from '../utils/planUtils.js';
 
 const signToken = (id) =>
   jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '7d' });
@@ -24,7 +27,7 @@ const sendTokenResponse = (user, statusCode, res) => {
 // ── Signup ────────────────────────────────────────────
 export const signup = async (req, res, next) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, betaCode } = req.body;
 
     if (!name || !email || !password) {
       return res.status(400).json({ success: false, message: 'All fields are required' });
@@ -35,7 +38,33 @@ export const signup = async (req, res, next) => {
       return res.status(409).json({ success: false, message: 'Email already registered' });
     }
 
-    const user = await User.create({ name, email, password });
+    let plan = 'free';
+
+    if (betaCode) {
+      const code = String(betaCode).trim().toUpperCase();
+      const claimed = await BetaCode.findOneAndUpdate(
+        { code, $expr: { $lt: ['$uses', '$maxUses'] } },
+        { $inc: { uses: 1 } },
+        { new: true },
+      );
+
+      if (!claimed) {
+        return res.status(400).json({ success: false, message: 'Invalid or exhausted beta code' });
+      }
+
+      plan = 'beta';
+    }
+
+    const user = await User.create({
+      name,
+      email,
+      password,
+      plan,
+      credits: getDailyCreditsForPlan(plan),
+      betaAccess: plan === 'beta' || plan === 'pro',
+      lastCreditResetAt: new Date(),
+    });
+
     sendTokenResponse(user, 201, res);
   } catch (err) {
     next(err);
@@ -73,5 +102,39 @@ export const logout = (_req, res) => {
 
 // ── Get Current User ──────────────────────────────────
 export const getMe = async (req, res) => {
-  res.json({ success: true, user: req.user });
+  ensurePlanUsageState(req.user);
+  await req.user.save();
+  res.json({
+    success: true,
+    user: req.user,
+    featureFlags: {
+      experimentalProcessing: isBetaUser(req.user),
+      highResolutionExport: isBetaUser(req.user),
+    },
+  });
+};
+
+// ── Admin: Promote to beta ───────────────────────────
+export const promoteBeta = async (req, res, next) => {
+  try {
+    const { userId } = req.body;
+    if (!userId) {
+      return res.status(400).json({ success: false, message: 'userId is required' });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    user.plan = 'beta';
+    user.betaAccess = true;
+    user.credits = getDailyCreditsForPlan('beta');
+    user.lastCreditResetAt = new Date();
+    await user.save();
+
+    res.json({ success: true, message: 'User promoted to beta', user });
+  } catch (err) {
+    next(err);
+  }
 };

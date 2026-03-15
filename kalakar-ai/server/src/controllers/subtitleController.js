@@ -1,6 +1,6 @@
 import { transliterate } from 'transliteration';
 import Video from '../models/Video.js';
-import { videoQueue } from '../config/redis.js';
+import { redisConnection, videoQueue } from '../config/redis.js';
 import { serializeVideoForClient } from '../utils/videoUrls.js';
 
 // ── Helpers ───────────────────────────────────────────
@@ -48,6 +48,9 @@ export const saveSubtitles = async (req, res, next) => {
     video.transcription = subtitlesToTranscript(subtitles);
     await video.save();
 
+    // Invalidate cached terminal status so fresh subtitle payload is always returned.
+    await redisConnection.del(`video:${video._id}:${req.user._id}`);
+
     res.json({ success: true, video: serializeVideoForClient(req, video) });
   } catch (err) {
     next(err);
@@ -71,8 +74,13 @@ export const renderVideo = async (req, res, next) => {
       });
     }
 
+    // Clear any cached completed payload before starting a new render pass.
+    await redisConnection.del(`video:${video._id}:${req.user._id}`);
+
     video.status = 'processing';
     video.errorMessage = null;
+    video.outputUrl = null;
+    video.outputPublicId = null;
     await video.save();
 
     await videoQueue.add('render-subtitles', {

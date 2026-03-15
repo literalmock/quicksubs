@@ -1,11 +1,18 @@
 import { transliterate } from 'transliteration';
 import { CAPTION_THEMES, splitToWordChunks } from './captionThemes.js';
+import { getTextStyleById } from '../editor/config/textStyles.js';
 
 export const DEFAULT_STYLE = {
   fontSize: 48,
   color: '#ffffff',
   stroke: '#000000',
   fontFamily: 'Poppins',
+  textTransform: 'none',
+  letterSpacing: '0px',
+  lineHeight: 1.14,
+  background: null,
+  shadow: '0 2px 8px rgba(0,0,0,0.4)',
+  animation: 'none', // transitions will be added later
   align: 'center',
   position: 'bottom', // top | middle | bottom | custom
   xPct: 0.5,
@@ -117,6 +124,56 @@ const hexToAssColor = (hex) => {
   return `&H${b}${g}${r}&`.toUpperCase();
 };
 
+const normalizeHex = (value, fallback = '#FFFFFF') => {
+  const text = String(value || '').trim();
+
+  const hex6 = text.match(/^#([0-9a-fA-F]{6})$/);
+  if (hex6) return `#${hex6[1].toUpperCase()}`;
+
+  const hex3 = text.match(/^#([0-9a-fA-F]{3})$/);
+  if (hex3) {
+    const [r, g, b] = hex3[1].split('');
+    return `#${(r + r + g + g + b + b).toUpperCase()}`;
+  }
+
+  const rgb = text.match(/^rgba?\((\d+),\s*(\d+),\s*(\d+)/i);
+  if (rgb) {
+    const r = Math.max(0, Math.min(255, Number(rgb[1]))).toString(16).padStart(2, '0');
+    const g = Math.max(0, Math.min(255, Number(rgb[2]))).toString(16).padStart(2, '0');
+    const b = Math.max(0, Math.min(255, Number(rgb[3]))).toString(16).padStart(2, '0');
+    return `#${(r + g + b).toUpperCase()}`;
+  }
+
+  const firstHex = text.match(/#([0-9a-fA-F]{6}|[0-9a-fA-F]{3})/);
+  if (firstHex) return normalizeHex(`#${firstHex[1]}`, fallback);
+
+  return fallback;
+};
+
+export const resolveCaptionRenderStyle = (style = {}) => {
+  const preset = getTextStyleById(style.theme || 'classic');
+  const merged = { ...preset, ...style };
+
+  const backgroundRaw = merged.background;
+  const backgroundColor = backgroundRaw ? normalizeHex(backgroundRaw, null) : null;
+  const hasBox = Boolean(backgroundColor);
+
+  return {
+    theme: merged.theme || preset.id,
+    fontFamily: merged.fontFamily || preset.fontFamily || DEFAULT_STYLE.fontFamily,
+    fontSize: Number(merged.fontSize || preset.fontSize || DEFAULT_STYLE.fontSize),
+    color: normalizeHex(merged.color || preset.color || DEFAULT_STYLE.color, '#FFFFFF'),
+    stroke: normalizeHex(merged.stroke || preset.stroke || DEFAULT_STYLE.stroke, '#000000'),
+    textTransform: merged.textTransform || preset.textTransform || 'none',
+    letterSpacing: merged.letterSpacing ?? preset.letterSpacing ?? '0px',
+    lineHeight: Number(merged.lineHeight ?? preset.lineHeight ?? 1.14),
+    backgroundColor,
+    hasBox,
+    shadow: merged.shadow ?? preset.shadow ?? DEFAULT_STYLE.shadow,
+    shadowEnabled: !hasBox && String(merged.shadow ?? '').trim() && String(merged.shadow) !== 'none',
+  };
+};
+
 // Extract the first font name from a CSS font-family string (e.g. '"Anton", sans-serif' → 'Anton')
 const extractFirstFont = (cssFontFamily) => {
   const match = String(cssFontFamily || 'Arial').match(/["']?([a-zA-Z][^"',]*)["']?/);
@@ -134,37 +191,13 @@ const toAssTime = (seconds) => {
 
 
 export const subtitlesToAss = (subtitles, vw = 1920, vh = 1080) => {
-  // Build one ASS style per unique theme used — so each theme gets correct font/color/outline
-  const usedKeys = [...new Set(['classic', ...subtitles.map((s) => s.style?.theme || 'classic')])];
-
-  const styleLines = usedKeys.map((key) => {
-    const t = CAPTION_THEMES[key] || CAPTION_THEMES.classic;
-    // Find the first subtitle using this theme to pick up any user overrides
-    const rep = subtitles.find((s) => (s.style?.theme || 'classic') === key);
-    const rst = rep?.style || {};
-    const fontName = extractFirstFont(rst.fontFamily || t.fontFamily);
-    const primaryColor = hexToAssBGR(rst.color ?? t.color);
-    const fs = rst.fontSize ?? t.fontSize;
-    const bold = t.fontWeight === '900' || t.fontWeight === '700' ? 1 : 0;
-    const spacing = parseFloat(t.letterSpacing) || 0;
-
-    // BorderStyle 3 = opaque box. ASS spec: the box fill color comes from
-    // OutlineColour (NOT BackColour). BackColour is the shadow color.
-    const hasBox = !!t.background;
-    const borderStyle = hasBox ? 3 : 1;
-    // WebKitTextStroke draws internally and externally (centered stroke),
-    // so a 5px WebKit stroke is only 2.5px visible outside the font.
-    // ASS Outline draws entirely outside. To match the visible stroke thickness
-    // exactly, we must divide the strokeWidth by 2.
-    const outline = hasBox ? 10 : ((t.strokeWidth ?? 2) / 2);
-    const shadow = hasBox ? 0 : 1;
-    const outlineColor = hasBox
-      ? hexToAssBGR(t.background)          // box fill = gold
-      : hexToAssBGR(rst.stroke ?? t.stroke); // normal stroke color
-    const backColor = hasBox ? '&H80000000' : '&H80000000';  // shadow color
-
-    return `Style: ${key},${fontName},${fs},${primaryColor},&H000000FF,${outlineColor},${backColor},${bold},0,0,0,100,100,${spacing},0,${borderStyle},${outline},${shadow},2,10,10,30,1`;
-  }).join('\n');
+  // Keep two base styles:
+  // - Base: normal outline captions
+  // - Box: opaque box captions (BorderStyle=3) for background presets
+  const styleLines = [
+    'Style: Base,Poppins,52,&H00FFFFFF,&H000000FF,&H00000000,&H80000000,1,0,0,0,100,100,0,0,1,1.2,1,2,10,10,30,1',
+    'Style: Box,Poppins,52,&H00FFFFFF,&H000000FF,&H00FF00FF,&H00000000,1,0,0,0,100,100,0,0,3,8,0,2,10,10,30,1',
+  ].join('\n');
 
   const header = [
     '[Script Info]',
@@ -185,40 +218,53 @@ export const subtitlesToAss = (subtitles, vw = 1920, vh = 1080) => {
   const events = subtitles
     .map((sub) => {
       const st = sub.style || DEFAULT_STYLE;
-      const themeKey = st.theme || 'classic';
-      const theme = CAPTION_THEMES[themeKey] || CAPTION_THEMES.classic;
+      const resolved = resolveCaptionRenderStyle(st);
 
-      // Apply theme text transform
       let text = normalizeToLatin(sub.text);
-      if (theme.textTransform === 'uppercase') text = text.toUpperCase();
+      if (resolved.textTransform === 'uppercase') text = text.toUpperCase();
 
-      // Apply word-split multi-line (\N = hard line break in ASS)
-      if (theme.wordSplit) {
-        const chunks = splitToWordChunks(text, theme.wordsPerLine ?? 2);
+      // Match preview's split behavior for uppercase viral captions
+      if (resolved.textTransform === 'uppercase') {
+        const chunks = splitToWordChunks(text, 2);
         text = chunks.join('\\N');
       }
 
-      // Per-subtitle overrides — emit inline tags only for values that differ
-      // from the ASS Style line (which already carries the theme defaults)
-      
-      // Calculate exact center position based on percentages
+      const fontName = extractFirstFont(st.fontFamily || resolved.fontFamily || DEFAULT_STYLE.fontFamily);
+      const fontSize = Number(st.fontSize ?? resolved.fontSize ?? DEFAULT_STYLE.fontSize);
+      const primaryColor = resolved.color;
+      const outlineColor = resolved.stroke;
+      const spacing = parseFloat(resolved.letterSpacing ?? '0') || 0;
+      const hasShadow = resolved.shadowEnabled;
+      const bgColor = resolved.backgroundColor;
+      const useBoxStyle = Boolean(bgColor);
+
       const posX = Math.round((st.xPct !== undefined ? st.xPct : 0.5) * vw);
       const posY = Math.round((st.yPct !== undefined ? st.yPct : 0.85) * vh);
-      
-      // We always force middle-center alignment (\an5) to perfectly match HTML overlay's translate(-50%, -50%).
-      const overrides = [`\\an5`, `\\pos(${posX},${posY})`];
 
-      const repSt = subtitles.find((s2) => (s2.style?.theme || 'classic') === themeKey)?.style || {};
-      if (st.fontSize && st.fontSize !== (repSt.fontSize ?? theme.fontSize)) overrides.push(`\\fs${st.fontSize}`);
-      if (st.color && st.color !== (repSt.color ?? theme.color)) overrides.push(`\\1c${hexToAssColor(st.color)}`);
-      // For themes with background box (BorderStyle 3), OutlineColour = box fill,
-      // so only emit \3c override for normal outline themes.
-      if (!theme.background && st.stroke && st.stroke !== (repSt.stroke ?? theme.stroke)) {
-        overrides.push(`\\3c${hexToAssColor(st.stroke)}`);
+      // We force center anchor to mirror preview translate(-50%, -50%).
+      const overrides = [
+        '\\an5',
+        `\\pos(${posX},${posY})`,
+        `\\fn${fontName}`,
+        `\\fs${fontSize}`,
+        `\\1c${hexToAssColor(primaryColor)}`,
+        `\\fsp${spacing}`,
+        `\\shad${useBoxStyle ? 0 : (hasShadow ? 2 : 0)}`,
+      ];
+
+      if (bgColor) {
+        // BorderStyle=3 uses OutlineColour as box fill color.
+        // Keep modest padding via bord and force opaque fill.
+        overrides.push('\\bord6');
+        overrides.push('\\3a&H00&');
+        overrides.push(`\\3c${hexToAssColor(bgColor)}`);
+      } else {
+        overrides.push('\\bord1.2');
+        overrides.push(`\\3c${hexToAssColor(outlineColor)}`);
       }
 
       const tags = `{${overrides.join('')}}`;
-      return `Dialogue: 0,${toAssTime(sub.start)},${toAssTime(sub.end)},${themeKey},,0,0,0,,${tags}${text}`;
+      return `Dialogue: 0,${toAssTime(sub.start)},${toAssTime(sub.end)},${useBoxStyle ? 'Box' : 'Base'},,0,0,0,,${tags}${text}`;
     })
     .join('\n');
 

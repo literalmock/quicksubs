@@ -6,3 +6,12 @@ dist/
 tmp/
 *.log
 .DS_Store
+uploads/
+*.mp4
+*.mkv
+*.avi
+*.mov
+*.flv
+*.srt
+*.ass
+*.vtt   

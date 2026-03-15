@@ -8,6 +8,7 @@ import rateLimit from 'express-rate-limit';
 import path from 'path';
 import { connectDB } from './config/db.js';
 import authRoutes from './routes/auth.js';
+import adminRoutes from './routes/admin.js';
 import videoRoutes from './routes/video.js';
 
 const app = express();
@@ -63,8 +64,9 @@ const apiLimiter = rateLimit({
 
 // ── Routes ─────────────────────────────────────────────
 app.get('/health', (_req, res) => res.json({ status: 'ok', uptime: process.uptime() }));
-app.use('/auth', authLimiter, authRoutes);
-app.use('/video', apiLimiter, videoRoutes);
+app.use('/auth', authRoutes);
+app.use('/admin', apiLimiter, adminRoutes);
+app.use('/video', videoRoutes);
 
 // ── Global Error Handler ───────────────────────────────
 app.use((err, _req, res, _next) => {

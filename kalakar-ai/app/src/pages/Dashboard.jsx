@@ -1,8 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import api from '../api/axios';
 import VideoCard from '../components/VideoCard';
+import { useAuth } from '../context/AuthContext';
 
 const Dashboard = () => {
+  const { user, fetchUser } = useAuth();
   const [videos, setVideos] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -18,11 +20,12 @@ const Dashboard = () => {
   }, []);
 
   useEffect(() => {
+    fetchUser();
     fetchVideos();
     // Poll every 10s for status updates
     const interval = setInterval(fetchVideos, 10000);
     return () => clearInterval(interval);
-  }, [fetchVideos]);
+  }, [fetchVideos, fetchUser]);
 
   return (
     <div>
@@ -32,6 +35,10 @@ const Dashboard = () => {
           <h2 className="text-2xl font-bold">Your Videos</h2>
           <p className="text-surface-500 text-sm mt-1">
             {videos.length} video{videos.length !== 1 ? 's' : ''} total
+          </p>
+          <p className="text-surface-400 text-xs mt-2">
+            Plan: <span className="text-surface-200 font-medium uppercase">{user?.plan || 'free'}</span>
+            {' '}• Videos left today: <span className="text-primary-300 font-semibold">{user?.credits ?? 0}</span>
           </p>
         </div>
         <a
