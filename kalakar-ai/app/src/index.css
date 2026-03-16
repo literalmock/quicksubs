@@ -36,3 +36,121 @@
     @apply bg-surface-900 text-white font-sans antialiased;
   }
 }
+
+@layer utilities {
+  /* Glassmorphism */
+  .glass {
+    @apply bg-white/10 backdrop-blur-md border border-white/20;
+  }
+
+  .glass-sm {
+    @apply bg-white/[0.08] backdrop-blur-sm border border-white/10;
+  }
+
+  .glass-lg {
+    @apply bg-white/[0.15] backdrop-blur-lg border border-white/25;
+  }
+
+  /* Smooth transitions */
+  .transition-smooth {
+    @apply transition-all duration-300 ease-out;
+  }
+
+  /* Animations */
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-8px);
+    }
+  }
+
+  @keyframes glow-pulse {
+    0%, 100% {
+      box-shadow: 0 0 20px rgba(76, 110, 245, 0.2);
+    }
+    50% {
+      box-shadow: 0 0 30px rgba(76, 110, 245, 0.4);
+    }
+  }
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes slide-up {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes shimmer {
+    0% {
+      background-position: -1000px 0;
+    }
+    100% {
+      background-position: 1000px 0;
+    }
+  }
+
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  .animate-glow-pulse {
+    animation: glow-pulse 2s ease-in-out infinite;
+  }
+
+  .animate-fade-in {
+    animation: fade-in 0.5s ease-out;
+  }
+
+  .animate-slide-up {
+    animation: slide-up 0.5s ease-out;
+  }
+
+  .animate-shimmer {
+    background-size: 1000px 100%;
+    animation: shimmer 2s infinite;
+  }
+
+  /* Scale animations for interactions */
+  .hover-scale {
+    @apply transition-smooth hover:scale-105;
+  }
+
+  .active-scale {
+    @apply transition-smooth active:scale-95;
+  }
+
+  /* Gradient text utilities */
+  .gradient-text {
+    @apply bg-gradient-to-r from-primary-400 to-primary-600 bg-clip-text text-transparent;
+  }
+
+  /* Card animations */
+  .card-hover {
+    @apply transition-smooth hover:scale-[1.02] hover:-translate-y-1 hover:shadow-2xl;
+  }
+
+  .skeleton-loading {
+    background-image: linear-gradient(
+      90deg,
+      rgba(79, 70, 229, 0.1) 0%,
+      rgba(79, 70, 229, 0.2) 50%,
+      rgba(79, 70, 229, 0.1) 100%
+    );
+    animation: shimmer 2s infinite;
+  }
+}

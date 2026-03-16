@@ -1,36 +1,30 @@
 import { Link } from 'react-router-dom';
-
-const statusConfig = {
-  uploading: { color: 'bg-yellow-500/20 text-yellow-400', label: 'Uploading' },
-  queued: { color: 'bg-blue-500/20 text-blue-400', label: 'Queued' },
-  processing: { color: 'bg-purple-500/20 text-purple-400', label: 'Processing' },
-  completed: { color: 'bg-green-500/20 text-green-400', label: 'Completed' },
-  failed: { color: 'bg-red-500/20 text-red-400', label: 'Failed' },
-};
+import StatusBadge from './StatusBadge';
 
 const VideoCard = ({ video }) => {
-  const status = statusConfig[video.status] || statusConfig.queued;
-
   return (
-    <div className="bg-surface-800/60 rounded-2xl border border-surface-700 overflow-hidden hover:border-surface-600 transition-all duration-300 group">
+    <div className="group card-hover glass rounded-2xl overflow-hidden">
       {/* Thumbnail / Preview */}
-      <div className="aspect-video bg-surface-900 relative overflow-hidden">
+      <div className="aspect-video bg-gradient-to-br from-surface-800 to-surface-900 relative overflow-hidden border-b border-white/10">
         {video.status === 'completed' && video.outputUrl ? (
           <video
             src={video.outputUrl}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
             muted
             preload="metadata"
             onMouseOver={(e) => e.target.play()}
-            onMouseOut={(e) => { e.target.pause(); e.target.currentTime = 0; }}
+            onMouseOut={(e) => {
+              e.target.pause();
+              e.target.currentTime = 0;
+            }}
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <div className="text-center">
-              <span className="text-4xl">🎬</span>
+          <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-primary-600/10 to-primary-500/5">
+            <div className="text-center space-y-2">
+              <span className="text-5xl block animate-float">🎬</span>
               {video.status === 'processing' && (
-                <div className="mt-3 flex items-center gap-2 text-purple-400 text-sm">
-                  <div className="w-4 h-4 border-2 border-purple-400 border-t-transparent rounded-full animate-spin" />
+                <div className="flex items-center gap-2 text-primary-300 text-xs font-medium">
+                  <div className="w-3 h-3 border-2 border-primary-300 border-t-transparent rounded-full animate-spin" />
                   Processing…
                 </div>
               )}
@@ -38,32 +32,47 @@ const VideoCard = ({ video }) => {
           </div>
         )}
 
-        {/* Status badge */}
-        <div className="absolute top-3 right-3">
-          <span className={`px-3 py-1 rounded-full text-xs font-medium ${status.color}`}>
-            {status.label}
-          </span>
+        {/* Status badge - positioned in corner */}
+        <div className="absolute top-4 right-4">
+          <StatusBadge status={video.status} size="sm" />
         </div>
+
+        {/* Gradient overlay on hover */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-smooth" />
       </div>
 
       {/* Info */}
-      <div className="p-4">
-        <h3 className="font-medium text-sm truncate mb-2 group-hover:text-primary-400 transition-colors">
-          {video.title || 'Untitled Video'}
-        </h3>
-        <p className="text-xs text-surface-500">
-          {new Date(video.createdAt).toLocaleDateString('en-US', {
-            month: 'short', day: 'numeric', year: 'numeric',
-          })}
-        </p>
+      <div className="p-5 space-y-4">
+        {/* Title and Date */}
+        <div className="min-h-[48px] flex flex-col justify-center">
+          <h3 className="font-semibold text-sm text-white group-hover:text-primary-300 transition-colors line-clamp-2">
+            {video.title || 'Untitled Video'}
+          </h3>
+          <p className="text-xs text-surface-500 mt-1">
+            {new Date(video.createdAt).toLocaleDateString('en-US', {
+              month: 'short',
+              day: 'numeric',
+              year: 'numeric',
+            })}
+          </p>
+        </div>
+
+        {/* Error Message - if failed */}
+        {video.status === 'failed' && video.errorMessage && (
+          <div className="p-2.5 bg-red-500/10 border border-red-500/30 rounded-lg">
+            <p className="text-xs text-red-400 line-clamp-2" title={video.errorMessage}>
+              {video.errorMessage}
+            </p>
+          </div>
+        )}
 
         {/* Actions */}
-        <div className="mt-3 flex flex-wrap items-center gap-2">
+        <div className="flex gap-2 pt-2">
           <Link
             to={`/editor/${video._id}`}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-surface-700 hover:bg-surface-600 text-white text-xs font-medium rounded-lg transition-colors"
+            className="flex-1 inline-flex items-center justify-center gap-2 px-3 py-2 bg-surface-700/80 hover:bg-surface-700 text-white text-xs font-medium rounded-lg transition-all duration-200 active-scale border border-white/10 hover:border-white/20"
           >
-            ✏️ Edit Captions
+            ✏️ Edit
           </Link>
 
           {video.status === 'completed' && video.outputUrl && (
@@ -71,18 +80,12 @@ const VideoCard = ({ video }) => {
               href={video.outputUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-4 py-2 bg-primary-600 hover:bg-primary-500 text-white text-xs font-medium rounded-lg transition-colors"
+              className="flex-1 inline-flex items-center justify-center gap-2 px-3 py-2 bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-500 hover:to-primary-400 text-white text-xs font-medium rounded-lg transition-all duration-200 active-scale border border-white/10"
             >
               ⬇️ Download
             </a>
           )}
         </div>
-
-        {video.status === 'failed' && video.errorMessage && (
-          <p className="mt-2 text-xs text-red-400 truncate" title={video.errorMessage}>
-            Error: {video.errorMessage}
-          </p>
-        )}
       </div>
     </div>
   );
