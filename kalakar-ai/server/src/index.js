@@ -15,7 +15,12 @@ const PORT = process.env.PORT || 5000;
 const isDev = process.env.NODE_ENV !== 'production';
 
 // ── Security headers ───────────────────────────────────
-app.use(helmet());
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" },
+  crossOriginEmbedderPolicy: false,
+  contentSecurityPolicy: isDev ? false : undefined,
+  hsts: isDev ? false : undefined,
+}));
 
 // ── Request logging ────────────────────────────────────
 app.use(morgan(isDev ? 'dev' : 'combined'));

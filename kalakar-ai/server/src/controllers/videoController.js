@@ -2,9 +2,12 @@ import cloudinary from '../config/cloudinary.js';
 import { videoQueue, redisConnection } from '../config/redis.js';
 import Video from '../models/Video.js';
 import fs from 'fs';
+import path from 'path';
+import axios from 'axios';
 import { serializeVideoForClient } from '../utils/videoUrls.js';
+import { uploadOriginalToR2 } from '../config/r2.js';
 
-const VALID_LANGUAGES = ['english', 'hinglish'];
+const VALID_LANGUAGES = ['english', 'hindi', 'hinglish'];
 
 // ── Signed upload params for direct Cloudinary upload ──
 export const getUploadSignature = (req, res, next) => {
@@ -62,7 +65,7 @@ export const registerVideo = async (req, res, next) => {
   }
 };
 
-// ── Upload video to local storage when Cloudinary plan cap is exceeded ──
+// ── Upload video to local storage ──
 export const uploadLocalVideo = async (req, res, next) => {
   try {
     const { title, language: rawLang } = req.body;
@@ -73,20 +76,40 @@ export const uploadLocalVideo = async (req, res, next) => {
     }
 
     const language = VALID_LANGUAGES.includes(rawLang) ? rawLang : 'hinglish';
+    
+    // 1. Upload the local file to R2
+    console.log(`📦 uploadLocalVideo: Moving large file to Cloudflare R2: ${uploadedFile.originalname} (${uploadedFile.size} bytes)`);
+    const r2Result = await uploadOriginalToR2({
+      filePath: uploadedFile.path,
+      originalName: uploadedFile.originalname,
+      mimeType: uploadedFile.mimetype,
+    });
 
+    // 2. Register the video with the R2 URL
     const video = await Video.create({
       userId: req.user._id,
       title: title || uploadedFile.originalname || 'Untitled Video',
       language,
-      originalUrl: uploadedFile.path,
+      originalUrl: r2Result.url,
+      originalPublicId: r2Result.key, // Store R2 key for potential deletion later
       status: 'queued',
     });
 
+    // 3. Queue the job
     await videoQueue.add('process-video', {
       videoId: video._id.toString(),
-      originalUrl: uploadedFile.path,
+      originalUrl: r2Result.url,
+      originalPublicId: r2Result.key,
       language,
     });
+
+    // 4. Delete the local temporary file
+    try {
+      fs.unlinkSync(uploadedFile.path);
+      console.log(`✅ uploadLocalVideo: Local temp file deleted: ${uploadedFile.path}`);
+    } catch (err) {
+      console.warn(`⚠️ uploadLocalVideo: Failed to delete local temp file: ${err.message}`);
+    }
 
     res.status(201).json({ success: true, video: serializeVideoForClient(req, video) });
   } catch (err) {
@@ -128,7 +151,6 @@ export const getVideoStatus = async (req, res, next) => {
 
     if (cached) {
       const video = JSON.parse(cached);
-      // Only serve cache for terminal states
       if (video.status === 'completed' || video.status === 'failed') {
         return res.json({ success: true, video: serializeVideoForClient(req, video) });
       }
@@ -143,13 +165,70 @@ export const getVideoStatus = async (req, res, next) => {
       return res.status(404).json({ success: false, message: 'Video not found' });
     }
 
-    // Cache terminal states for 5 minutes — but only if outputUrl is present
-    // (transcription-only completion has no outputUrl yet; render sets it later)
     if ((video.status === 'completed' && video.outputUrl) || video.status === 'failed') {
       await redisConnection.set(cacheKey, JSON.stringify(video), 'EX', 300);
     }
 
     res.json({ success: true, video: serializeVideoForClient(req, video) });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// ── Stream preview/original video via API (restored same-origin playback) ──
+export const streamVideoSource = async (req, res, next) => {
+  try {
+    const video = await Video.findById(req.params.id).lean();
+
+    if (!video) {
+        return res.status(404).json({ success: false, message: 'Video not found' });
+    }
+
+    const variant = req.query.variant === 'preview' ? 'preview' : 'original';
+    const sourceUrl = variant === 'preview' ? (video?.previewUrl || video?.originalUrl) : video?.originalUrl;
+
+    if (!sourceUrl) {
+      return res.status(404).json({ success: false, message: 'Video source not found' });
+    }
+
+    if (sourceUrl.startsWith('http')) {
+      const upstream = await axios.get(sourceUrl, {
+        responseType: 'stream',
+        headers: req.headers.range ? { Range: req.headers.range } : {},
+        validateStatus: () => true,
+      });
+
+      res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+      res.setHeader('Access-Control-Allow-Origin', req.headers.origin || '*');
+      res.setHeader('Access-Control-Allow-Credentials', 'true');
+
+      const passthroughHeaders = [
+        'content-type',
+        'content-length',
+        'content-range',
+        'accept-ranges',
+        'cache-control',
+        'etag',
+        'last-modified',
+      ];
+
+      res.status(upstream.status);
+      passthroughHeaders.forEach((name) => {
+        const value = upstream.headers[name];
+        if (value) res.setHeader(name, value);
+      });
+
+      upstream.data.pipe(res);
+      return;
+    }
+
+    const fullPath = path.resolve(sourceUrl);
+    if (fs.existsSync(fullPath)) {
+      res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+      return res.sendFile(fullPath);
+    }
+
+    return res.status(404).json({ success: false, message: 'Video source not found' });
   } catch (err) {
     next(err);
   }
@@ -163,20 +242,34 @@ export const retranscribeVideo = async (req, res, next) => {
       return res.status(404).json({ success: false, message: 'Video not found' });
     }
 
-    // Clear the status cache so polling sees the queued/processing state immediately
+    const { provider = 'groq', language } = req.body || {};
+    const chosenLanguage = VALID_LANGUAGES.includes(language)
+      ? language
+      : video.language || 'hinglish';
+
     const cacheKey = `video:${video._id}:${req.user._id}`;
     await redisConnection.del(cacheKey);
 
-    await video.updateOne({ status: 'queued', subtitleSrt: '', transcription: '' });
+    await video.updateOne({
+      status: 'queued',
+      subtitleSrt: '',
+      transcription: '',
+      language: chosenLanguage,
+      failureCount: 0,
+    });
 
     await videoQueue.add('process-video', {
       videoId: video._id.toString(),
       originalUrl: video.originalUrl,
       originalPublicId: video.originalPublicId,
-      language: video.language || 'hinglish',
+      language: chosenLanguage,
+      provider,
     });
 
-    res.json({ success: true, message: 'Re-transcription queued' });
+    res.json({
+      success: true,
+      message: `Re-transcription queued (provider: ${provider}, language: ${chosenLanguage})`,
+    });
   } catch (err) {
     next(err);
   }
@@ -203,5 +296,3 @@ export const deleteVideo = async (req, res, next) => {
     next(err);
   }
 };
-
-

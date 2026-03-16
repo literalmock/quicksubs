@@ -33,17 +33,32 @@ const downloadToFile = (url, filePath) => {
  * @returns {Promise<string>} – path to downloaded file
  */
 export const downloadVideo = async (url) => {
-  const localSource = url?.startsWith('file://') ? new URL(url) : null;
-  const sourcePath = localSource ? localSource.pathname : url;
-  const ext = path.extname(sourcePath || '') || '.mp4';
-  const filePath = path.join(ensureTmpDir(), `input_${Date.now()}${ext}`);
-
-  if (isLocalPath(sourcePath)) {
-    fs.copyFileSync(sourcePath, filePath);
-    return filePath;
+  if (!url) {
+    throw new Error('downloadVideo: URL or path is missing');
   }
 
-  return downloadToFile(url, filePath);
+  console.log(`📥 downloadVideo: Processing source: ${url}`);
+
+  try {
+    const localSource = url.startsWith('file://') ? new URL(url) : null;
+    const sourcePath = localSource ? localSource.pathname : url;
+    const ext = path.extname(sourcePath || '') || '.mp4';
+    const filePath = path.join(ensureTmpDir(), `input_${Date.now()}${ext}`);
+
+    if (isLocalPath(sourcePath)) {
+      console.log(`📂 downloadVideo: Using local file: ${sourcePath}`);
+      fs.copyFileSync(sourcePath, filePath);
+      return filePath;
+    }
+
+    console.log(`🌐 downloadVideo: Downloading from URL: ${url}`);
+    return await downloadToFile(url, filePath);
+  } catch (err) {
+    if (err.code === 'ERR_INVALID_URL' || err.message?.includes('Invalid URL')) {
+      throw new Error(`downloadVideo: Invalid URL or malformed local path: "${url}"`);
+    }
+    throw err;
+  }
 };
 
 /**

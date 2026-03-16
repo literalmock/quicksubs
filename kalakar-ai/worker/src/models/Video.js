@@ -14,7 +14,7 @@ const videoSchema = new mongoose.Schema({
   },
   language: {
     type: String,
-    enum: ['english', 'hinglish'],
+    enum: ['english', 'hindi', 'hinglish'],
     default: 'hinglish',
   },
   originalUrl: {
@@ -23,6 +23,24 @@ const videoSchema = new mongoose.Schema({
   },
   originalPublicId: {
     type: String,
+  },
+  // Lightweight preview for editor playback (stored in R2)
+  previewUrl: {
+    type: String,
+    default: null,
+  },
+  previewPublicId: {
+    type: String,
+    default: null,
+  },
+  // Extracted audio URL (stored in R2)
+  audioUrl: {
+    type: String,
+    default: null,
+  },
+  audioPublicId: {
+    type: String,
+    default: null,
   },
   outputUrl: {
     type: String,
@@ -44,6 +62,10 @@ const videoSchema = new mongoose.Schema({
     type: String,
     default: null,
   },
+  transcriptionEngine: {
+    type: String,
+    default: 'cloudinary',
+  },
   status: {
     type: String,
     enum: ['uploading', 'queued', 'processing', 'completed', 'failed'],
@@ -52,6 +74,16 @@ const videoSchema = new mongoose.Schema({
   errorMessage: {
     type: String,
     default: null,
+  },
+  // Local path of cached audio file (for workers)
+  cachedAudioPath: {
+    type: String,
+    default: null,
+  },
+  // Consecutive failure counter
+  failureCount: {
+    type: Number,
+    default: 0,
   },
 }, { timestamps: true });
 

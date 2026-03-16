@@ -73,6 +73,7 @@ const VideoCanvas = ({
         onPause={onPause}
         onEnded={onEnded}
         playsInline
+        crossOrigin="anonymous"
       />
 
       {/* Click-to-toggle-play — behind the caption overlay */}

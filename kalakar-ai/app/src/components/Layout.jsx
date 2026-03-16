@@ -17,11 +17,11 @@ const Layout = () => {
   ];
 
   return (
-    <div className="min-h-screen flex bg-surface-900">
-      {/* Sidebar */}
-      <aside className="w-64 bg-surface-800/50 border-r border-surface-700 flex flex-col">
+    <div className="h-screen flex bg-surface-900 overflow-hidden">
+      {/* Sidebar — fixed, never scrolls */}
+      <aside className="w-64 h-screen bg-surface-800/50 border-r border-surface-700 flex flex-col shrink-0">
         {/* Logo */}
-        <div className="p-6 border-b border-surface-700">
+        <div className="p-6 border-b border-surface-700 shrink-0">
           <h1 className="text-xl font-bold bg-gradient-to-r from-primary-400 to-primary-600 bg-clip-text text-transparent">
             QuickSubs
           </h1>
@@ -29,7 +29,7 @@ const Layout = () => {
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 p-4 space-y-1">
+        <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
           {links.map((link) => (
             <NavLink
               key={link.to}
@@ -48,10 +48,10 @@ const Layout = () => {
           ))}
         </nav>
 
-        {/* User */}
-        <div className="p-4 border-t border-surface-700">
+        {/* User — always visible at bottom */}
+        <div className="p-4 border-t border-surface-700 shrink-0">
           <div className="flex items-center gap-3 mb-3">
-            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center text-sm font-bold">
+            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center text-sm font-bold shrink-0">
               {user?.name?.charAt(0)?.toUpperCase() || 'U'}
             </div>
             <div className="flex-1 min-w-0">
@@ -68,8 +68,8 @@ const Layout = () => {
         </div>
       </aside>
 
-      {/* Main */}
-      <main className="flex-1 overflow-auto">
+      {/* Main — only this content area scrolls */}
+      <main className="flex-1 overflow-y-auto">
         <div className="max-w-6xl mx-auto p-8">
           <Outlet />
         </div>

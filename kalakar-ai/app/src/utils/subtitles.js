@@ -36,12 +36,36 @@ export const normalizeSubtitle = (subtitle, index = 0) => {
   };
 };
 
+const sanitizeHinglish = (text) => {
+  let t = String(text || '');
+
+  // Normalize slashes used as random separators into spaces
+  t = t.replace(/[\/|]+/g, ' ');
+
+  // Collapse 3+ repeated letters to 2 (heeellooo -> heelloo)
+  t = t.replace(/([a-zA-Z])\1{2,}/g, '$1$1');
+
+  // Fix common artifacts: random capital N at end of "haiN" → "hain"
+  t = t.replace(/\bhaiN\b/gi, 'hain');
+
+  // Normalize double-i endings: "unkii" → "unki"
+  t = t.replace(/([a-zA-Z]+)ii\b/gi, '$1i');
+
+  // Collapse extra spaces and trim
+  t = t.replace(/\s+/g, ' ').trim();
+
+  return t;
+};
+
 export const normalizeToLatin = (value) => {
   const result = transliterate(String(value || ''));
-  return result
-    .replace(/[^\x00-\x7F]/g, '')
+  const ascii = result
+    .replace(/[^\x00-\x7F]/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
+
+  // Basic Hinglish clean‑up on top of transliteration
+  return sanitizeHinglish(ascii);
 };
 
 /**

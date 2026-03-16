@@ -1,0 +1,954 @@
+{
+  "videoId": "69b85947ca4f081c5c0bdb88",
+  "provider": "elevenlabs",
+  "language": "hinglish",
+  "timestamp": "2026-03-16T20:38:28.184Z",
+  "raw": {
+    "text": "Luxury buyers हमेशा एक बहुत बड़ी mistake करते हैं। उनकी सोच है कि हम लोग इतनी ज्यादा एक checklist बना लें अपनी specifications की कि हमें options best to best हमारे favor में मिले। It is always better to discuss your requirement with a real estate professional and understand the market कि market में available क्या है। And I know you can choose to keep looking but generally देखा क्या गया है within the time frame of three to six months property prices बढ़ जाते हैं। तो कहीं ऐसा ना हो कि 10 करोड़ का मकान जो आप देखने जा रहे हैं वो 12 का हो जाए या 15 का जो देख रहे हैं वो 17 का हो जाए। Well in case you want some smart homes which meets your profile, your specifications please get in touch.",
+    "words": [
+      {
+        "word": "Luxury",
+        "start": 0.239,
+        "end": 0.579
+      },
+      {
+        "word": "buyers",
+        "start": 0.659,
+        "end": 1.1
+      },
+      {
+        "word": "हमेशा",
+        "start": 1.159,
+        "end": 1.699
+      },
+      {
+        "word": "एक",
+        "start": 1.759,
+        "end": 1.939
+      },
+      {
+        "word": "बहुत",
+        "start": 1.979,
+        "end": 2.179
+      },
+      {
+        "word": "बड़ी",
+        "start": 2.22,
+        "end": 2.359
+      },
+      {
+        "word": "mistake",
+        "start": 2.399,
+        "end": 2.719
+      },
+      {
+        "word": "करते",
+        "start": 2.759,
+        "end": 2.979
+      },
+      {
+        "word": "हैं।",
+        "start": 2.98,
+        "end": 3.24
+      },
+      {
+        "word": "उनकी",
+        "start": 3.279,
+        "end": 3.559
+      },
+      {
+        "word": "सोच",
+        "start": 3.599,
+        "end": 3.859
+      },
+      {
+        "word": "है",
+        "start": 3.899,
+        "end": 4.099
+      },
+      {
+        "word": "कि",
+        "start": 4.619,
+        "end": 4.839
+      },
+      {
+        "word": "हम",
+        "start": 5.579,
+        "end": 5.699
+      },
+      {
+        "word": "लोग",
+        "start": 5.719,
+        "end": 5.94
+      },
+      {
+        "word": "इतनी",
+        "start": 6.36,
+        "end": 6.699
+      },
+      {
+        "word": "ज्यादा",
+        "start": 6.839,
+        "end": 7.38
+      },
+      {
+        "word": "एक",
+        "start": 7.46,
+        "end": 7.639
+      },
+      {
+        "word": "checklist",
+        "start": 8.099,
+        "end": 8.5
+      },
+      {
+        "word": "बना",
+        "start": 8.539,
+        "end": 8.72
+      },
+      {
+        "word": "लें",
+        "start": 8.8,
+        "end": 9.379
+      },
+      {
+        "word": "अपनी",
+        "start": 9.42,
+        "end": 9.619
+      },
+      {
+        "word": "specifications",
+        "start": 9.639,
+        "end": 10.439
+      },
+      {
+        "word": "की",
+        "start": 10.5,
+        "end": 10.659
+      },
+      {
+        "word": "कि",
+        "start": 11.119,
+        "end": 11.26
+      },
+      {
+        "word": "हमें",
+        "start": 11.3,
+        "end": 11.819
+      },
+      {
+        "word": "options",
+        "start": 11.9,
+        "end": 12.239
+      },
+      {
+        "word": "best",
+        "start": 12.319,
+        "end": 12.479
+      },
+      {
+        "word": "to",
+        "start": 12.52,
+        "end": 12.619
+      },
+      {
+        "word": "best",
+        "start": 12.659,
+        "end": 12.859
+      },
+      {
+        "word": "हमारे",
+        "start": 12.92,
+        "end": 13.139
+      },
+      {
+        "word": "favor",
+        "start": 13.26,
+        "end": 13.48
+      },
+      {
+        "word": "में",
+        "start": 13.519,
+        "end": 13.619
+      },
+      {
+        "word": "मिले।",
+        "start": 13.639,
+        "end": 14
+      },
+      {
+        "word": "It",
+        "start": 14.019,
+        "end": 14.099
+      },
+      {
+        "word": "is",
+        "start": 14.14,
+        "end": 14.239
+      },
+      {
+        "word": "always",
+        "start": 14.38,
+        "end": 14.739
+      },
+      {
+        "word": "better",
+        "start": 14.819,
+        "end": 15.119
+      },
+      {
+        "word": "to",
+        "start": 15.359,
+        "end": 15.44
+      },
+      {
+        "word": "discuss",
+        "start": 15.599,
+        "end": 16.079
+      },
+      {
+        "word": "your",
+        "start": 16.12,
+        "end": 16.22
+      },
+      {
+        "word": "requirement",
+        "start": 16.26,
+        "end": 16.86
+      },
+      {
+        "word": "with",
+        "start": 16.94,
+        "end": 17.04
+      },
+      {
+        "word": "a",
+        "start": 17.06,
+        "end": 17.1
+      },
+      {
+        "word": "real",
+        "start": 17.139,
+        "end": 17.28
+      },
+      {
+        "word": "estate",
+        "start": 17.359,
+        "end": 17.52
+      },
+      {
+        "word": "professional",
+        "start": 17.579,
+        "end": 18.04
+      },
+      {
+        "word": "and",
+        "start": 18.34,
+        "end": 18.54
+      },
+      {
+        "word": "understand",
+        "start": 18.659,
+        "end": 19.1
+      },
+      {
+        "word": "the",
+        "start": 19.14,
+        "end": 19.219
+      },
+      {
+        "word": "market",
+        "start": 19.279,
+        "end": 19.56
+      },
+      {
+        "word": "कि",
+        "start": 19.6,
+        "end": 19.68
+      },
+      {
+        "word": "market",
+        "start": 19.739,
+        "end": 19.959
+      },
+      {
+        "word": "में",
+        "start": 20,
+        "end": 20.079
+      },
+      {
+        "word": "available",
+        "start": 20.119,
+        "end": 20.459
+      },
+      {
+        "word": "क्या",
+        "start": 20.559,
+        "end": 20.68
+      },
+      {
+        "word": "है।",
+        "start": 20.719,
+        "end": 21.639
+      },
+      {
+        "word": "And",
+        "start": 21.699,
+        "end": 22.12
+      },
+      {
+        "word": "I",
+        "start": 22.22,
+        "end": 22.26
+      },
+      {
+        "word": "know",
+        "start": 22.34,
+        "end": 22.659
+      },
+      {
+        "word": "you",
+        "start": 22.739,
+        "end": 22.899
+      },
+      {
+        "word": "can",
+        "start": 22.959,
+        "end": 23.459
+      },
+      {
+        "word": "choose",
+        "start": 23.519,
+        "end": 23.7
+      },
+      {
+        "word": "to",
+        "start": 23.739,
+        "end": 23.839
+      },
+      {
+        "word": "keep",
+        "start": 23.92,
+        "end": 24.079
+      },
+      {
+        "word": "looking",
+        "start": 24.139,
+        "end": 24.919
+      },
+      {
+        "word": "but",
+        "start": 25,
+        "end": 25.199
+      },
+      {
+        "word": "generally",
+        "start": 25.579,
+        "end": 25.88
+      },
+      {
+        "word": "देखा",
+        "start": 25.939,
+        "end": 26.139
+      },
+      {
+        "word": "क्या",
+        "start": 26.219,
+        "end": 26.359
+      },
+      {
+        "word": "गया",
+        "start": 26.42,
+        "end": 26.54
+      },
+      {
+        "word": "है",
+        "start": 26.619,
+        "end": 26.76
+      },
+      {
+        "word": "within",
+        "start": 27.239,
+        "end": 27.479
+      },
+      {
+        "word": "the",
+        "start": 27.5,
+        "end": 27.619
+      },
+      {
+        "word": "time",
+        "start": 27.699,
+        "end": 27.92
+      },
+      {
+        "word": "frame",
+        "start": 27.96,
+        "end": 28.219
+      },
+      {
+        "word": "of",
+        "start": 28.299,
+        "end": 28.439
+      },
+      {
+        "word": "three",
+        "start": 28.479,
+        "end": 28.639
+      },
+      {
+        "word": "to",
+        "start": 28.68,
+        "end": 28.819
+      },
+      {
+        "word": "six",
+        "start": 28.819,
+        "end": 29.019
+      },
+      {
+        "word": "months",
+        "start": 29.059,
+        "end": 29.399
+      },
+      {
+        "word": "property",
+        "start": 29.739,
+        "end": 30.059
+      },
+      {
+        "word": "prices",
+        "start": 30.119,
+        "end": 30.42
+      },
+      {
+        "word": "बढ़",
+        "start": 30.459,
+        "end": 30.579
+      },
+      {
+        "word": "जाते",
+        "start": 30.619,
+        "end": 30.819
+      },
+      {
+        "word": "हैं।",
+        "start": 30.819,
+        "end": 31
+      },
+      {
+        "word": "तो",
+        "start": 31,
+        "end": 31.099
+      },
+      {
+        "word": "कहीं",
+        "start": 31.12,
+        "end": 31.299
+      },
+      {
+        "word": "ऐसा",
+        "start": 31.42,
+        "end": 31.62
+      },
+      {
+        "word": "ना",
+        "start": 31.679,
+        "end": 31.76
+      },
+      {
+        "word": "हो",
+        "start": 31.86,
+        "end": 31.94
+      },
+      {
+        "word": "कि",
+        "start": 32.059,
+        "end": 32.139
+      },
+      {
+        "word": "10",
+        "start": 32.219,
+        "end": 32.36
+      },
+      {
+        "word": "करोड़",
+        "start": 32.44,
+        "end": 32.599
+      },
+      {
+        "word": "का",
+        "start": 32.659,
+        "end": 32.72
+      },
+      {
+        "word": "मकान",
+        "start": 32.78,
+        "end": 33.04
+      },
+      {
+        "word": "जो",
+        "start": 33.08,
+        "end": 33.139
+      },
+      {
+        "word": "आप",
+        "start": 33.159,
+        "end": 33.259
+      },
+      {
+        "word": "देखने",
+        "start": 33.319,
+        "end": 33.54
+      },
+      {
+        "word": "जा",
+        "start": 33.6,
+        "end": 33.68
+      },
+      {
+        "word": "रहे",
+        "start": 33.74,
+        "end": 33.819
+      },
+      {
+        "word": "हैं",
+        "start": 33.84,
+        "end": 34.1
+      },
+      {
+        "word": "वो",
+        "start": 34.119,
+        "end": 34.259
+      },
+      {
+        "word": "12",
+        "start": 34.259,
+        "end": 34.479
+      },
+      {
+        "word": "का",
+        "start": 34.54,
+        "end": 34.619
+      },
+      {
+        "word": "हो",
+        "start": 34.659,
+        "end": 34.72
+      },
+      {
+        "word": "जाए",
+        "start": 34.78,
+        "end": 35.039
+      },
+      {
+        "word": "या",
+        "start": 35.139,
+        "end": 35.24
+      },
+      {
+        "word": "15",
+        "start": 35.279,
+        "end": 35.56
+      },
+      {
+        "word": "का",
+        "start": 35.599,
+        "end": 35.659
+      },
+      {
+        "word": "जो",
+        "start": 35.72,
+        "end": 35.799
+      },
+      {
+        "word": "देख",
+        "start": 35.86,
+        "end": 36
+      },
+      {
+        "word": "रहे",
+        "start": 36.06,
+        "end": 36.159
+      },
+      {
+        "word": "हैं",
+        "start": 36.18,
+        "end": 36.259
+      },
+      {
+        "word": "वो",
+        "start": 36.299,
+        "end": 36.34
+      },
+      {
+        "word": "17",
+        "start": 36.4,
+        "end": 36.659
+      },
+      {
+        "word": "का",
+        "start": 36.72,
+        "end": 36.779
+      },
+      {
+        "word": "हो",
+        "start": 36.84,
+        "end": 36.9
+      },
+      {
+        "word": "जाए।",
+        "start": 36.979,
+        "end": 37.439
+      },
+      {
+        "word": "Well",
+        "start": 37.459,
+        "end": 37.56
+      },
+      {
+        "word": "in",
+        "start": 37.599,
+        "end": 37.68
+      },
+      {
+        "word": "case",
+        "start": 37.72,
+        "end": 37.899
+      },
+      {
+        "word": "you",
+        "start": 37.939,
+        "end": 38.02
+      },
+      {
+        "word": "want",
+        "start": 38.06,
+        "end": 38.2
+      },
+      {
+        "word": "some",
+        "start": 38.24,
+        "end": 38.34
+      },
+      {
+        "word": "smart",
+        "start": 38.479,
+        "end": 38.72
+      },
+      {
+        "word": "homes",
+        "start": 38.799,
+        "end": 39.619
+      },
+      {
+        "word": "which",
+        "start": 39.68,
+        "end": 39.84
+      },
+      {
+        "word": "meets",
+        "start": 39.939,
+        "end": 40.42
+      },
+      {
+        "word": "your",
+        "start": 40.5,
+        "end": 40.639
+      },
+      {
+        "word": "profile,",
+        "start": 40.739,
+        "end": 41.7
+      },
+      {
+        "word": "your",
+        "start": 41.799,
+        "end": 41.899
+      },
+      {
+        "word": "specifications",
+        "start": 41.959,
+        "end": 42.759
+      },
+      {
+        "word": "please",
+        "start": 42.84,
+        "end": 42.959
+      },
+      {
+        "word": "get",
+        "start": 43,
+        "end": 43.079
+      },
+      {
+        "word": "in",
+        "start": 43.079,
+        "end": 43.139
+      },
+      {
+        "word": "touch.",
+        "start": 43.159,
+        "end": 45.639
+      }
+    ],
+    "segments": [
+      {
+        "start": 0.239,
+        "end": 2.359,
+        "text": "Luxury buyers हमेशा एक बहुत बड़ी"
+      },
+      {
+        "start": 2.399,
+        "end": 4.099,
+        "text": "mistake करते हैं। उनकी सोच है"
+      },
+      {
+        "start": 4.619,
+        "end": 7.639,
+        "text": "कि हम लोग इतनी ज्यादा एक"
+      },
+      {
+        "start": 8.099,
+        "end": 10.659,
+        "text": "checklist बना लें अपनी specifications की"
+      },
+      {
+        "start": 11.119,
+        "end": 12.859,
+        "text": "कि हमें options best to best"
+      },
+      {
+        "start": 12.92,
+        "end": 14.239,
+        "text": "हमारे favor में मिले। It is"
+      },
+      {
+        "start": 14.38,
+        "end": 16.86,
+        "text": "always better to discuss your requirement"
+      },
+      {
+        "start": 16.94,
+        "end": 18.54,
+        "text": "with a real estate professional and"
+      },
+      {
+        "start": 18.659,
+        "end": 20.079,
+        "text": "understand the market कि market में"
+      },
+      {
+        "start": 20.119,
+        "end": 22.659,
+        "text": "available क्या है। And I know"
+      },
+      {
+        "start": 22.739,
+        "end": 24.919,
+        "text": "you can choose to keep looking"
+      },
+      {
+        "start": 25,
+        "end": 26.76,
+        "text": "but generally देखा क्या गया है"
+      },
+      {
+        "start": 27.239,
+        "end": 28.639,
+        "text": "within the time frame of three"
+      },
+      {
+        "start": 28.68,
+        "end": 30.579,
+        "text": "to six months property prices बढ़"
+      },
+      {
+        "start": 30.619,
+        "end": 31.76,
+        "text": "जाते हैं। तो कहीं ऐसा ना"
+      },
+      {
+        "start": 31.86,
+        "end": 33.04,
+        "text": "हो कि 10 करोड़ का मकान"
+      },
+      {
+        "start": 33.08,
+        "end": 34.1,
+        "text": "जो आप देखने जा रहे हैं"
+      },
+      {
+        "start": 34.119,
+        "end": 35.24,
+        "text": "वो 12 का हो जाए या"
+      },
+      {
+        "start": 35.279,
+        "end": 36.259,
+        "text": "15 का जो देख रहे हैं"
+      },
+      {
+        "start": 36.299,
+        "end": 37.56,
+        "text": "वो 17 का हो जाए। Well"
+      },
+      {
+        "start": 37.599,
+        "end": 38.72,
+        "text": "in case you want some smart"
+      },
+      {
+        "start": 38.799,
+        "end": 41.899,
+        "text": "homes which meets your profile, your"
+      },
+      {
+        "start": 41.959,
+        "end": 45.639,
+        "text": "specifications please get in touch."
+      }
+    ],
+    "captions": [
+      {
+        "start": 0.239,
+        "end": 2.359,
+        "text": "Luxury buyers हमेशा एक बहुत\nबड़ी",
+        "lines": 2
+      },
+      {
+        "start": 2.399,
+        "end": 4.099,
+        "text": "mistake करते हैं। उनकी सोच\nहै",
+        "lines": 2
+      },
+      {
+        "start": 4.619,
+        "end": 7.639,
+        "text": "कि हम लोग इतनी ज्यादा एक",
+        "lines": 1
+      },
+      {
+        "start": 8.099,
+        "end": 10.659,
+        "text": "checklist बना लें अपनी की\nspecifications",
+        "lines": 2
+      },
+      {
+        "start": 11.119,
+        "end": 12.859,
+        "text": "कि हमें options best to best",
+        "lines": 1
+      },
+      {
+        "start": 12.92,
+        "end": 14.239,
+        "text": "हमारे favor में मिले। It is",
+        "lines": 1
+      },
+      {
+        "start": 14.38,
+        "end": 16.86,
+        "text": "always better to discuss\nyour requirement",
+        "lines": 2
+      },
+      {
+        "start": 16.94,
+        "end": 18.54,
+        "text": "with a real estate and\nprofessional",
+        "lines": 2
+      },
+      {
+        "start": 18.659,
+        "end": 20.079,
+        "text": "understand the market कि में\nmarket",
+        "lines": 2
+      },
+      {
+        "start": 20.119,
+        "end": 22.659,
+        "text": "available क्या है। And I\nknow",
+        "lines": 2
+      },
+      {
+        "start": 22.739,
+        "end": 24.919,
+        "text": "you can choose to keep\nlooking",
+        "lines": 2
+      },
+      {
+        "start": 25,
+        "end": 26.76,
+        "text": "but generally देखा क्या गया\nहै",
+        "lines": 2
+      },
+      {
+        "start": 27.239,
+        "end": 28.639,
+        "text": "within the time frame of\nthree",
+        "lines": 2
+      },
+      {
+        "start": 28.68,
+        "end": 30.579,
+        "text": "to six months property बढ़\nprices",
+        "lines": 2
+      },
+      {
+        "start": 30.619,
+        "end": 31.76,
+        "text": "जाते हैं। तो कहीं ऐसा ना",
+        "lines": 1
+      },
+      {
+        "start": 31.86,
+        "end": 33.04,
+        "text": "हो कि 10 करोड़ का मकान",
+        "lines": 1
+      },
+      {
+        "start": 33.08,
+        "end": 34.1,
+        "text": "जो आप देखने जा रहे हैं",
+        "lines": 1
+      },
+      {
+        "start": 34.119,
+        "end": 35.24,
+        "text": "वो 12 का हो जाए या",
+        "lines": 1
+      },
+      {
+        "start": 35.279,
+        "end": 36.259,
+        "text": "15 का जो देख रहे हैं",
+        "lines": 1
+      },
+      {
+        "start": 36.299,
+        "end": 37.56,
+        "text": "वो 17 का हो जाए। Well",
+        "lines": 1
+      },
+      {
+        "start": 37.599,
+        "end": 38.72,
+        "text": "in case you want some smart",
+        "lines": 1
+      },
+      {
+        "start": 38.799,
+        "end": 41.899,
+        "text": "homes which meets your your\nprofile,",
+        "lines": 2
+      },
+      {
+        "start": 41.959,
+        "end": 45.639,
+        "text": "specifications please get in\ntouch.",
+        "lines": 2
+      }
+    ],
+    "manualReview": []
+  }
+}

@@ -1,42 +1,41 @@
-import { Router } from 'express';
+import express from 'express';
+import { protect } from '../middleware/auth.js';
+import {
+  getUploadSignature,
+  registerVideo,
+  uploadLocalVideo,
+  listVideos,
+  getVideoStatus,
+  streamVideoSource,
+  retranscribeVideo,
+  deleteVideo,
+} from '../controllers/videoController.js';
+import { saveSubtitles, renderVideo } from '../controllers/subtitleController.js';
 import multer from 'multer';
 import path from 'path';
-import fs from 'fs';
-import { getUploadSignature, registerVideo, uploadLocalVideo, listVideos, getVideoStatus, deleteVideo, retranscribeVideo } from '../controllers/videoController.js';
-import { saveSubtitles, renderVideo } from '../controllers/subtitleController.js';
-import { protect } from '../middleware/auth.js';
-import { validate, subtitleRules, videoIdRule } from '../middleware/validate.js';
 
-const router = Router();
-const uploadDir = path.resolve(process.cwd(), 'uploads', 'originals');
+const router = express.Router();
 
-if (!fs.existsSync(uploadDir)) {
-	fs.mkdirSync(uploadDir, { recursive: true });
-}
-
-const upload = multer({
-	storage: multer.diskStorage({
-		destination: (_req, _file, cb) => cb(null, uploadDir),
-		filename: (_req, file, cb) => {
-			const ext = path.extname(file.originalname) || '.mp4';
-			const base = path.basename(file.originalname, ext).replace(/[^a-zA-Z0-9_-]/g, '-');
-			cb(null, `${Date.now()}-${base}${ext}`);
-		},
-	}),
-	limits: { fileSize: 250 * 1024 * 1024 },
+// Mullter setup for local uploads
+const storage = multer.diskStorage({
+  destination: 'uploads/',
+  filename: (req, file, cb) => {
+    cb(null, `${Date.now()}-${file.originalname}`);
+  },
 });
+const upload = multer({ storage });
 
-// ── Video CRUD ────────────────────────────────────────
 router.get('/upload-signature', protect, getUploadSignature);
 router.post('/register', protect, registerVideo);
 router.post('/upload-local', protect, upload.single('file'), uploadLocalVideo);
 router.get('/list', protect, listVideos);
 router.get('/status/:id', protect, getVideoStatus);
+router.get('/source/:id', streamVideoSource); // Made public to allow cross-origin streaming without auth headers
 router.delete('/:id', protect, deleteVideo);
 router.post('/:id/retranscribe', protect, retranscribeVideo);
 
-// ── Subtitle actions ──────────────────────────────────
-router.post('/save-subtitles', protect, validate(subtitleRules), saveSubtitles);
-router.post('/render', protect, validate(videoIdRule), renderVideo);
+// Subtitle actions
+router.post('/save-subtitles', protect, saveSubtitles);
+router.post('/render', protect, renderVideo);
 
 export default router;

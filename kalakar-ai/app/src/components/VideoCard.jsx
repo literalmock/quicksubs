@@ -1,4 +1,6 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import api from '../api/axios';
 
 const statusConfig = {
   uploading: { color: 'bg-yellow-500/20 text-yellow-400', label: 'Uploading' },
@@ -21,6 +23,7 @@ const VideoCard = ({ video }) => {
             className="w-full h-full object-cover"
             muted
             preload="metadata"
+            crossOrigin="anonymous"
             onMouseOver={(e) => e.target.play()}
             onMouseOut={(e) => { e.target.pause(); e.target.currentTime = 0; }}
           />

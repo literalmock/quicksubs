@@ -14,7 +14,7 @@ const videoSchema = new mongoose.Schema({
   },
   language: {
     type: String,
-    enum: ['english', 'hinglish'],
+    enum: ['english', 'hindi', 'hinglish'],
     default: 'hinglish',
   },
   originalUrl: {
@@ -23,6 +23,22 @@ const videoSchema = new mongoose.Schema({
   },
   originalPublicId: {
     type: String,
+  },
+  previewUrl: {
+    type: String,
+    default: null,
+  },
+  previewPublicId: {
+    type: String,
+    default: null,
+  },
+  audioUrl: {
+    type: String,
+    default: null,
+  },
+  audioPublicId: {
+    type: String,
+    default: null,
   },
   outputUrl: {
     type: String,
@@ -44,6 +60,10 @@ const videoSchema = new mongoose.Schema({
     type: String,
     default: null,
   },
+  transcriptionEngine: {
+    type: String,
+    default: 'cloudinary',
+  },
   status: {
     type: String,
     enum: ['uploading', 'queued', 'processing', 'completed', 'failed'],
@@ -53,6 +73,14 @@ const videoSchema = new mongoose.Schema({
     type: String,
     default: null,
   },
+  cachedAudioPath: {
+    type: String,
+    default: null,
+  },
+  failureCount: {
+    type: Number,
+    default: 0,
+  },
 }, { timestamps: true });
 
-export default mongoose.model('Video', videoSchema);
+export default mongoose.models.Video || mongoose.model('Video', videoSchema);
