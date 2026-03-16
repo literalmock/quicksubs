@@ -27,13 +27,16 @@ Implemented in `src/jobs/transcribeJob.js`:
   - generate preview mp4 (stored in R2, used by the editor)
   - extract audio wav + upload to R2 (cached for future retranscribe)
 - Transcribe audio using provider routing in `src/pipeline/transcribe.js`
-- Refine captions (`src/pipeline/refineCaptions.js`) and generate SRT
+- For Hinglish, run cross-check + verification in `src/pipeline/quality/`
+- Only save subtitles when the Hinglish quality gate approves the result
+- Generate SRT from the approved captions
 - Save `subtitleSrt`, `previewUrl`, `audioUrl`, etc. in MongoDB
 
 Notes:
 
 - Worker stores the **last raw transcription response** in `last_transcription_log.json` (local file) to help debugging.
 - Retries are capped (`MAX_RETRIES = 3`) and a failure count is tracked on the `Video` doc.
+- Hinglish verification uses a primary transcript, an optional cross-check provider, Gemini or DeepSeek for Roman Hinglish correction, and heuristic quality checks before marking a job `completed`.
 
 ## Render pipeline (export)
 
@@ -67,4 +70,9 @@ Required in practice:
   - `GROQ_API_KEY` (default)
   - `ELEVENLABS_API_KEY` (used by editor retranscribe)
   - `OPENAI_API_KEY` (if you enable/use OpenAI path)
-
+- Optional Hinglish quality gate:
+  - `HINGLISH_VERIFIER_PROVIDER=gemini|deepseek`
+  - `GOOGLE_GENERATIVE_AI_API_KEY` or `DEEPSEEK_API_KEY`
+  - `HINGLISH_VERIFIER_MODEL`
+  - `HINGLISH_MIN_AVG_CONFIDENCE`
+  - `HINGLISH_MAX_LOW_CONFIDENCE_CAPTIONS`

@@ -3,7 +3,7 @@
 QuickSubs is a video captioning + editor pipeline:
 
 - Upload a video
-- Auto-generate subtitles (ASR → caption refinement → SRT)
+- Auto-generate subtitles (ASR → Hinglish verification/quality gate → SRT)
 - Edit subtitles in a browser timeline/canvas editor
 - Export a final video with **burned-in subtitles** (FFmpeg)
 
@@ -31,7 +31,8 @@ kalakar-ai/
    - Create a small **preview mp4** for in-editor playback (stored in R2)
    - Extract audio (wav) and cache it in R2 (so retranscribe is cheap)
    - Transcribe audio (provider defaults to **Groq**; ElevenLabs available via retranscribe)
-   - Refine/cleanup captions and generate `subtitleSrt`
+   - For Hinglish, cross-check the transcript and reject low-confidence results
+   - Generate `subtitleSrt`
    - Save results back to MongoDB (`status: "completed"`, `previewUrl`, `audioUrl`, `subtitleSrt`, etc.)
 
 ### Editor → export (async render)
@@ -74,10 +75,10 @@ kalakar-ai/
   - `worker/src/jobs/transcribeJob.js` (job name: `process-video`)
   - `worker/src/jobs/renderJob.js` (job name: `render-subtitles`)
 - **Pipelines** (download/ffmpeg/transcribe/refine):
+- **Pipelines** (download/ffmpeg/transcribe):
   - `worker/src/pipeline/transcribe.js` (provider routing)
   - `worker/src/pipeline/groqTranscriber.js`
   - `worker/src/pipeline/transcribeElevenLabs.js`
-  - `worker/src/pipeline/refineCaptions.js`
   - `worker/src/pipeline/createPreview.js`
   - `worker/src/pipeline/extractAudio.js` (+ audio chunking helpers)
   - `worker/src/pipeline/burnSubtitles.js`
@@ -165,4 +166,3 @@ Typical mapping (can vary):
 - API + Worker: Render/Fly/etc
 - Redis: Upstash
 - DB: MongoDB Atlas
-

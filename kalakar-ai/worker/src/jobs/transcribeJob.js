@@ -4,12 +4,10 @@ import fs from 'fs';
 import { downloadVideo } from '../pipeline/download.js';
 import { createPreview } from '../pipeline/createPreview.js';
 import { extractAudio } from '../pipeline/extractAudio.js';
-import { transcribeAudio } from '../pipeline/transcribe.js';
-import { segmentCaptions, captionsToSrt } from '../pipeline/segmentCaptions.js';
-import { refineCaptions } from '../pipeline/refineCaptions.js';
+import { captionsToSrt } from '../pipeline/segmentCaptions.js';
 import { uploadVideoAssetToR2 } from '../config/r2.js';
 import { cleanup } from '../utils/cleanup.js';
-import { romanizeHinglishText, romanizeCaptions } from '../utils/hinglishRomanizer.js';
+import { runVerifiedTranscription } from '../pipeline/quality/runVerifiedTranscription.js';
 
 const MAX_RETRIES = 3;
 const PROMPT_LEAK_REGEX = /(do not translate|hinglish conversation mixing|output everything in roman|keep english words exactly)/i;
@@ -68,6 +66,7 @@ export const processTranscribeJob = async (job) => {
   }
 
   let inputPath, audioPath, previewPath;
+  let qualityReport = null;
   let previewAsset = {
     url: existingPreviewUrl || videoDoc.previewUrl || null,
     key: existingPreviewPublicId || videoDoc.previewPublicId || null,
@@ -120,15 +119,17 @@ export const processTranscribeJob = async (job) => {
 
     // 3. Transcribe with sophisticated pipeline
     console.log(`🧠 Transcribing audio with ${provider}…`);
-    const transcription = await transcribeAudio(audioPath, language, provider);
-    
+    const transcription = await runVerifiedTranscription({ audioPath, language, provider });
+    qualityReport = transcription.quality || null;
+
     // Save raw response to local file as requested
     saveTranscriptionLog({
       videoId,
       provider,
       language,
       timestamp: new Date().toISOString(),
-      raw: transcription 
+      quality: qualityReport,
+      raw: transcription.audit || transcription,
     });
 
     console.log(`📝 Transcription Result Summary:
@@ -143,11 +144,10 @@ export const processTranscribeJob = async (job) => {
     // 4. Transform to captions
     console.log('✂️  Processing captions…');
     const inputCaptions = transcription.captions || [];
-    let refinedCaptions = await refineCaptions(inputCaptions, language);
-    refinedCaptions = sanitizeCaptionList(refinedCaptions);
+    let refinedCaptions = sanitizeCaptionList(inputCaptions);
 
     if (!refinedCaptions.length && inputCaptions.length > 0) {
-      console.warn('⚠️ Refinement/Sanitization removed all captions, using raw ASR results');
+      console.warn('⚠️ Sanitization removed all captions, using raw ASR results');
       refinedCaptions = sanitizeCaptionList(inputCaptions);
     }
 
@@ -155,37 +155,38 @@ export const processTranscribeJob = async (job) => {
       throw new Error(`Transcription resulted in zero valid captions (Raw: ${inputCaptions.length})`);
     }
 
-    // 4b. Optional Hinglish romanization + cleanup
-    const finalLanguage = language || videoDoc.language || 'hinglish';
-    const hinglishMode = finalLanguage.toLowerCase() === 'hinglish';
+    const finalCaptions = refinedCaptions;
+    const srt = captionsToSrt(finalCaptions);
+    const finalTranscriptText = String(transcription.text || '').trim();
 
-    const hinglishCaptions = hinglishMode
-      ? romanizeCaptions(refinedCaptions)
-      : refinedCaptions;
-
-    const srt = captionsToSrt(hinglishCaptions);
-    
     if (transcription.manualReview?.length) {
       console.warn(`⚠️ Manual review required for ${transcription.manualReview.length} chunk(s)`);
+    }
+
+    if (qualityReport && !qualityReport.approved) {
+      throw new Error(
+        `Hinglish verification rejected subtitles: ${qualityReport.issues.join(' | ') || 'quality gate failed'}`
+      );
     }
     await job.updateProgress(92);
 
     // 5. Save results and reset failure count
     await Video.findByIdAndUpdate(videoId, {
       status: 'completed',
-      transcription: hinglishMode ? romanizeHinglishText(transcription.text) : transcription.text,
+      transcription: finalTranscriptText,
       subtitleSrt: srt,
       previewUrl: previewAsset.url,
       previewPublicId: previewAsset.key,
       audioUrl: audioAsset.url,
       audioPublicId: audioAsset.key,
+      transcriptionQuality: qualityReport,
       failureCount: 0,
       errorMessage: null,
     });
 
     await job.updateProgress(100);
-    console.log(`✅ Transcription job completed (${hinglishCaptions.length} captions)`);
-    return { success: true, captions: hinglishCaptions };
+    console.log(`✅ Transcription job completed (${finalCaptions.length} captions)`);
+    return { success: true, captions: finalCaptions };
   } catch (err) {
     console.error(`❌ Transcribe job failed:`, err.message);
     const newCount = (videoDoc.failureCount || 0) + 1;
@@ -193,6 +194,11 @@ export const processTranscribeJob = async (job) => {
       status: 'failed',
       errorMessage: err.message,
       failureCount: newCount,
+      previewUrl: previewAsset.url || videoDoc.previewUrl || null,
+      previewPublicId: previewAsset.key || videoDoc.previewPublicId || null,
+      audioUrl: audioAsset.url || videoDoc.audioUrl || null,
+      audioPublicId: audioAsset.key || videoDoc.audioPublicId || null,
+      transcriptionQuality: qualityReport,
     });
     throw err;
   } finally {

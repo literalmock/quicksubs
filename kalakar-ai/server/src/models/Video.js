@@ -60,6 +60,10 @@ const videoSchema = new mongoose.Schema({
     type: String,
     default: null,
   },
+  transcriptionQuality: {
+    type: mongoose.Schema.Types.Mixed,
+    default: null,
+  },
   transcriptionEngine: {
     type: String,
     default: 'cloudinary',

@@ -1,4 +1,3 @@
-import { transliterate } from 'transliteration';
 import Video from '../models/Video.js';
 import { videoQueue } from '../config/redis.js';
 import { serializeVideoForClient } from '../utils/videoUrls.js';
@@ -14,22 +13,26 @@ const formatSrtTime = (seconds) => {
   return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')},${String(ms).padStart(3, '0')}`;
 };
 
+const cleanSubtitleText = (value) =>
+  String(value || '')
+    .replace(/\r?\n+/g, ' ')
+    .replace(/[“”]/g, '"')
+    .replace(/[‘’]/g, "'")
+    .replace(/\s+/g, ' ')
+    .trim();
+
 const jsonToSrt = (subtitles) =>
   subtitles
     .map((item, index) => {
-      const text = transliterate(String(item.text || '').trim())
-        .replace(/[^\x00-\x7F]/g, '')
-        .replace(/\s+/g, ' ')
-        .trim();
+      const text = cleanSubtitleText(item.text);
       return `${index + 1}\n${formatSrtTime(item.start)} --> ${formatSrtTime(item.end)}\n${text}`;
     })
     .join('\n\n');
 
 const subtitlesToTranscript = (subtitles) =>
   subtitles
-    .map((s) => transliterate(String(s.text || '')))
+    .map((s) => cleanSubtitleText(s.text))
     .join(' ')
-    .replace(/[^\x00-\x7F]/g, '')
     .replace(/\s+/g, ' ')
     .trim();
 

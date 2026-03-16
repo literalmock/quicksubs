@@ -55,13 +55,23 @@ const VideoEditor = () => {
         const { data } = await api.get(`/video/status/${id}`);
         setVideo(data.video);
 
+        if (data.video.status === 'failed') {
+          setSubtitles([]);
+          setSelectedId(null);
+          setNeedsDurationSync(false);
+          setError(data.video.errorMessage || 'Transcription failed');
+          return;
+        }
+
         const parsed = data.video.subtitleSrt
           ? parseSrtToSubtitles(data.video.subtitleSrt)
-          : generateSeedSubtitles(data.video.transcription || '', SEED_DURATION);
+          : data.video.transcription
+            ? generateSeedSubtitles(data.video.transcription || '', SEED_DURATION)
+            : [];
 
         setSubtitles(parsed);
         setSelectedId(parsed[0]?.id || null);
-        setNeedsDurationSync(!data.video.subtitleSrt);
+        setNeedsDurationSync(!data.video.subtitleSrt && parsed.length > 0);
       } catch (err) {
         setError(err.response?.data?.message || 'Failed to load video');
       } finally {
@@ -210,6 +220,8 @@ const VideoEditor = () => {
           } else if (data.video.status === 'failed') {
             clearInterval(poll);
             setRetranscribing(false);
+            setSubtitles([]);
+            setSelectedId(null);
             setError(data.video.errorMessage || 'Re-transcription failed');
           }
         } catch {

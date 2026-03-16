@@ -255,6 +255,8 @@ export const retranscribeVideo = async (req, res, next) => {
       subtitleSrt: '',
       transcription: '',
       language: chosenLanguage,
+      transcriptionQuality: null,
+      errorMessage: null,
       failureCount: 0,
     });
 
