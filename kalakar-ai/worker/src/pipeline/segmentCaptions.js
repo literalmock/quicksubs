@@ -1,17 +1,19 @@
 /**
- * Caption Segmentation Pipeline Step
+ * Caption Segmentation Pipeline Step - UPGRADED FOR WORD-AWARE CAPTIONS
  *
  * Converts raw Whisper transcription output into an array of timed caption
- * objects: { start, end, text }.
+ * objects with word-level timing and intelligent chunking.
  *
+ * Output format: { start, end, text, words: [{ word, start, end, highlight }] }
  * Also generates SRT content for subtitle burning.
  */
 
-const WORDS_PER_CAP = 4;
+const MAX_WORDS_PER_CHUNK = 4;
 const MAX_CAPTION_DURATION = 4;
 const MIN_CAPTION_DURATION = 0.8;
-const WORD_PAUSE_THRESHOLD = 0.9;
+const PAUSE_THRESHOLD = 0.45; // sentence pauses
 const SEGMENT_OVERLAP_EPSILON = 0.15;
+const KEYWORDS_FOR_HIGHLIGHTING = ['Delhi', 'Dubai', 'war', 'investors', 'million', 'billion', 'success', 'growth'];
 
 /**
  * Converts seconds to SRT timestamp: HH:MM:SS,mmm
@@ -76,9 +78,19 @@ const normalizeCaptions = (captions) => {
 };
 
 /**
- * Groups word-level timestamps into caption chunks.
+ * Mark important keywords for highlighting
+ */
+const markHighlights = (word) => {
+  const normalizedWord = String(word || '').toLowerCase().replace(/[.,!?;:'"]/g, '');
+  return KEYWORDS_FOR_HIGHLIGHTING.some((keyword) =>
+    normalizedWord.includes(keyword.toLowerCase())
+  );
+};
+
+/**
+ * Groups word-level timestamps into caption chunks with word-level detail.
  * @param {Array} words – Whisper word objects ({ word, start, end })
- * @returns {Array<{ start: number, end: number, text: string }>}
+ * @returns {Array<{ start: number, end: number, text: string, words: Array }>}
  */
 const wordsToCaption = (words) => {
   const captions = [];
@@ -86,10 +98,19 @@ const wordsToCaption = (words) => {
 
   const flush = () => {
     if (!group.length) return;
+    
+    const words_detail = group.map((w) => ({
+      word: w.word,
+      start: w.start,
+      end: w.end,
+      highlight: markHighlights(w.word),
+    }));
+    
     captions.push({
       start: group[0].start,
       end: group[group.length - 1].end,
       text: group.map((w) => w.word).join(' ').trim(),
+      words: words_detail,
     });
     group = [];
   };
@@ -107,13 +128,13 @@ const wordsToCaption = (words) => {
     const gap = previous ? current.start - previous.end : 0;
     const wouldExceedDuration = previous && current.end - group[0].start > MAX_CAPTION_DURATION;
 
-    if (group.length && (gap >= WORD_PAUSE_THRESHOLD || wouldExceedDuration)) {
+    if (group.length && (gap >= PAUSE_THRESHOLD || wouldExceedDuration)) {
       flush();
     }
 
     group.push(current);
 
-    if (group.length >= WORDS_PER_CAP || endsSentence(current.word)) {
+    if (group.length >= MAX_WORDS_PER_CHUNK || endsSentence(current.word)) {
       flush();
     }
   });

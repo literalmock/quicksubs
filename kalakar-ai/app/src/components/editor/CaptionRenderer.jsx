@@ -45,6 +45,7 @@ const CaptionRenderer = ({ subtitle, currentTime = 0, templateKey = 'classic', e
   const resolvedEffectKey = effectKey || subtitle?.effect || 'fade';
   const isAliAbdaal = resolvedTemplateKey === 'aliAbdaal';
 
+  // UPGRADED: Use word-level timing from segmentation, fallback to synthesis
   const words = Array.isArray(subtitle?.words) && subtitle.words.length
     ? subtitle.words
     : fallbackWords(subtitle);
@@ -88,6 +89,9 @@ const CaptionRenderer = ({ subtitle, currentTime = 0, templateKey = 'classic', e
             const absoluteIndex = line.startIndex + wordIndex;
             const label = getWordText(word);
             const isActive = absoluteIndex === activeWordIndex;
+            
+            // UPGRADED: Support keyword highlighting from segmentation
+            const shouldHighlight = word?.highlight === true;
 
             // Ali Abdaal: spoken (past + current) = dark, future = gray
             const wordStyle = isAliAbdaal
@@ -100,6 +104,13 @@ const CaptionRenderer = ({ subtitle, currentTime = 0, templateKey = 'classic', e
                   fontWeight: absoluteIndex <= activeWordIndex ? '700' : '400',
                   transition: 'color 0.06s ease',
                 }
+              : shouldHighlight
+              ? {
+                  fontWeight: '700',
+                  textDecoration: 'underline',
+                  textDecorationColor: 'rgba(59, 130, 246, 0.5)',
+                  textUnderlineOffset: '2px',
+                }
               : {};
 
             return (
@@ -111,6 +122,7 @@ const CaptionRenderer = ({ subtitle, currentTime = 0, templateKey = 'classic', e
                   isActive ? 'active-word' : 'inactive-word',
                   isActive && resolvedEffectKey === 'wordPop' ? 'caption-word--pop' : '',
                   isActive && resolvedEffectKey === 'highlightSweep' ? 'caption-word--sweep' : '',
+                  shouldHighlight ? 'caption-word--keyword' : '',
                 ].filter(Boolean).join(' ')}
               >
                 {label}

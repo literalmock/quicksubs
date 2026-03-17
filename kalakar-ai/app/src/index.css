@@ -123,3 +123,28 @@
   50%  { transform: scale(1.04); }
   to   { transform: scale(1); }
 }
+
+/* ─────────────────────────────────────────────────────
+   Ali Abdaal Single-Line Mode
+   Forces captions to stay on one line with ellipsis handling
+───────────────────────────────────────────────────── */
+.caption-renderer--ali-abdaal {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 80%;
+  display: inline-block;
+}
+
+/* ─────────────────────────────────────────────────────
+   Keyword Highlighting
+   Subtle underline for important keywords
+───────────────────────────────────────────────────── */
+.caption-word--keyword {
+  font-weight: 700;
+}
+
+/* Default highlighted word appearance */
+.caption-word {
+  transition: all 0.08s ease;
+}

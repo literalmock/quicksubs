@@ -4,7 +4,8 @@ import fs from 'fs';
 import { downloadVideo } from '../pipeline/download.js';
 import { createPreview } from '../pipeline/createPreview.js';
 import { extractAudio } from '../pipeline/extractAudio.js';
-import { captionsToSrt } from '../pipeline/segmentCaptions.js';
+import { captionsToSrt, segmentCaptions } from '../pipeline/segmentCaptions.js';
+import { formatCaptionsFromSegments } from '../pipeline/captionFormatter.js';
 import { uploadVideoAssetToR2 } from '../config/r2.js';
 import { cleanup } from '../utils/cleanup.js';
 import { runVerifiedTranscription } from '../pipeline/quality/runVerifiedTranscription.js';
@@ -135,15 +136,30 @@ export const processTranscribeJob = async (job) => {
     console.log(`📝 Transcription Result Summary:
 - Text Length: ${transcription.text?.length || 0}
 - Raw Captions: ${transcription.captions?.length || 0}
+- Word Count: ${transcription.words?.length || 0}
 `);
     if (!transcription || (!transcription.text && (!transcription.captions || transcription.captions.length === 0))) {
       throw new Error(`Transcription provider ${provider} returned empty result`);
     }
     await job.updateProgress(72);
 
-    // 4. Transform to captions
-    console.log('✂️  Processing captions…');
-    const inputCaptions = transcription.captions || [];
+    // 4. UPGRADED: Transform to word-aware captions
+    console.log('✂️  Processing captions with word-level segmentation…');
+    
+    // Try word-level segmentation first
+    let inputCaptions = [];
+    if (transcription.words && transcription.words.length > 0) {
+      console.log('📍 Using word-level timestamps for intelligent segmentation…');
+      const segmentResult = segmentCaptions(transcription);
+      inputCaptions = segmentResult.captions;
+      console.log(`✨ Generated ${inputCaptions.length} smart captions from ${transcription.words.length} words`);
+    } else if (transcription.segments && transcription.segments.length > 0) {
+      console.log('⚡ Falling back to segment-based caption formatting…');
+      inputCaptions = formatCaptionsFromSegments(transcription.segments);
+    } else if (transcription.captions) {
+      inputCaptions = transcription.captions;
+    }
+    
     let refinedCaptions = sanitizeCaptionList(inputCaptions);
 
     if (!refinedCaptions.length && inputCaptions.length > 0) {

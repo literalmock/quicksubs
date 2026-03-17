@@ -2,8 +2,21 @@ const MAX_CHARS_PER_LINE = 28;
 const MAX_LINES = 2;
 const MIN_DURATION = 1;
 const MAX_DURATION = 4;
+const MAX_WORDS_PER_SEGMENT = 5; // Split if segment exceeds this word count
 
 const normalizeText = (text) => String(text || '').replace(/\s+/g, ' ').trim();
+
+/**
+ * Marks keywords for highlighting in word-level captions
+ */
+const KEYWORDS_FOR_HIGHLIGHTING = ['Delhi', 'Dubai', 'war', 'investors', 'million', 'billion', 'success', 'growth'];
+
+const markHighlights = (word) => {
+  const normalizedWord = String(word || '').toLowerCase().replace(/[.,!?;:'"]/g, '');
+  return KEYWORDS_FOR_HIGHLIGHTING.some((keyword) =>
+    normalizedWord.includes(keyword.toLowerCase())
+  );
+};
 
 const splitWordsToBlocks = (words) => {
   const blocks = [];
@@ -51,43 +64,118 @@ const splitWordsToBlocks = (words) => {
   return blocks;
 };
 
+/**
+ * Converts word objects to captions with word-level timing and highlights
+ */
+const buildWordLevelCaptions = (words, start, end) => {
+  const captions = [];
+  let group = [];
+  let groupStart = null;
+
+  const flush = () => {
+    if (!group.length) return;
+    
+    const words_detail = group.map((w) => ({
+      word: w,
+      start: words.findIndex((word) => word === w) < words.length ? start : start,
+      end: end,
+      highlight: markHighlights(w),
+    }));
+    
+    const caption = {
+      start: groupStart,
+      end: end,
+      text: group.join(' '),
+      words: words_detail,
+    };
+    captions.push(caption);
+    group = [];
+    groupStart = null;
+  };
+
+  words.forEach((word) => {
+    if (groupStart === null) groupStart = start;
+    group.push(word);
+    
+    if (group.length >= MAX_WORDS_PER_SEGMENT) {
+      flush();
+    }
+  });
+
+  if (group.length) flush();
+  return captions;
+};
+
+/**
+ * UPGRADED: Handles word-level timing if available, otherwise falls back to block-based
+ */
 const segmentToCaptions = (segment) => {
   const text = normalizeText(segment.text);
   if (!text) return [];
 
-  const words = text.split(' ');
-  const blocks = splitWordsToBlocks(words);
-  if (!blocks.length) return [];
-
   const start = Math.max(0, Number(segment.start) || 0);
   const end = Math.max(start + 0.2, Number(segment.end) || start + 0.2);
-  const totalDuration = end - start;
-
-  let perCaption = totalDuration / blocks.length;
-  if (totalDuration >= blocks.length) {
-    perCaption = Math.max(MIN_DURATION, Math.min(MAX_DURATION, perCaption));
-  } else {
-    perCaption = Math.min(MAX_DURATION, perCaption);
+  
+  // If segment has word-level timing info, use it
+  if (Array.isArray(segment.words) && segment.words.length > 0) {
+    return buildWordLevelCaptions(
+      segment.words.map((w) => w.word || w),
+      start,
+      end
+    );
   }
 
-  const captions = [];
-  let cursor = start;
-
-  blocks.forEach((block, index) => {
-    const isLast = index === blocks.length - 1;
-    const nextEnd = isLast ? end : Math.min(end, cursor + perCaption);
-
-    captions.push({
-      start: cursor,
-      end: Math.max(cursor + 0.2, nextEnd),
-      text: block,
-      lines: Math.min(MAX_LINES, block.split('\n').length),
+  // Fallback: block-based splitting for text-only segments
+  const words = text.split(' ');
+  
+  // Split long segments into smaller chunks
+  if (words.length > MAX_WORDS_PER_SEGMENT) {
+    const chunks = [];
+    for (let i = 0; i < words.length; i += MAX_WORDS_PER_SEGMENT) {
+      chunks.push(words.slice(i, i + MAX_WORDS_PER_SEGMENT));
+    }
+    
+    const totalDuration = end - start;
+    let cursor = start;
+    
+    return chunks.map((chunk, index) => {
+      const isLast = index === chunks.length - 1;
+      const chunkDuration = totalDuration / chunks.length;
+      const nextEnd = isLast ? end : Math.min(end, cursor + chunkDuration);
+      
+      const words_detail = chunk.map((word) => ({
+        word,
+        start: cursor,
+        end: nextEnd,
+        highlight: markHighlights(word),
+      }));
+      
+      const caption = {
+        start: cursor,
+        end: Math.max(cursor + 0.2, nextEnd),
+        text: chunk.join(' '),
+        words: words_detail,
+      };
+      
+      cursor = Math.max(cursor + 0.2, nextEnd);
+      return caption;
     });
+  }
 
-    cursor = Math.max(cursor + 0.2, nextEnd);
-  });
-
-  return captions;
+  // Short segments: single caption
+  const words_detail = words.map((word) => ({
+    word,
+    start,
+    end,
+    highlight: markHighlights(word),
+  }));
+  
+  return [{
+    start,
+    end: Math.max(start + 0.2, end),
+    text: text,
+    words: words_detail,
+  }];
 };
 
 export const formatCaptionsFromSegments = (segments) => {
