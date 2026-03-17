@@ -1,0 +1,212 @@
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                   MONGODB SETUP - VISUAL GUIDE                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+YOUR CURRENT ERROR:
+┌──────────────────────────────────────────────────────────────────────────┐
+│ ❌ MongoDB connection error: querySrv ENOTFOUND _mongodb._tcp...          │
+└──────────────────────────────────────────────────────────────────────────┘
+
+REASON:
+  Your .env has a PLACEHOLDER URI → mongodb+srv://user:password@...
+  Instead of your REAL URI → mongodb+srv://YOUR_USER:YOUR_PASS@cluster...
+
+═══════════════════════════════════════════════════════════════════════════════
+
+                    OPTION A: MONGODB ATLAS (RECOMMENDED)
+                    
+                         https://mongodb.com/atlas
+                              ↓
+                        Sign Up (Free)
+                              ↓
+                      Create a Cluster
+                              ↓
+                     Click "Connect" ← Copy URI
+                              ↓
+                  Network Access → Whitelist IP
+                              ↓
+                      Copy Your Real URI
+                              ↓
+              mongodb+srv://YOUR_USER:YOUR_PASS@...
+
+
+═══════════════════════════════════════════════════════════════════════════════
+
+                    OPTION B: LOCAL MONGODB
+                    
+                         Install MongoDB
+                              ↓
+                    brew install mongodb-community
+                              ↓
+                    brew services start mongod
+                              ↓
+                  Use: mongodb://localhost:27017/quicksubs
+
+
+═══════════════════════════════════════════════════════════════════════════════
+
+                        FIX IN 3 SIMPLE STEPS
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│ STEP 1: Get Your MongoDB URI                                            │
+│ ─────────────────────────────────────────────────────────────────────── │
+│                                                                         │
+│  If using MongoDB Atlas:                                               │
+│    1. Go to https://www.mongodb.com/cloud/atlas                       │
+│    2. Create account (free)                                           │
+│    3. Create cluster                                                   │
+│    4. Click "Connect" and copy connection string                      │
+│    5. Add your IP to Network Access                                   │
+│                                                                         │
+│  If using Local MongoDB:                                               │
+│    Use: mongodb://localhost:27017/quicksubs                           │
+└─────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│ STEP 2: Update .env File                                                │
+│ ─────────────────────────────────────────────────────────────────────── │
+│                                                                         │
+│  Location: kalakar-ai/server/.env                                     │
+│                                                                         │
+│  Change FROM:                                                           │
+│  ────────────                                                           │
+│  MONGODB_URI=mongodb+srv://user:password@cluster...                   │
+│                                                                         │
+│  Change TO:                                                             │
+│  ──────────                                                             │
+│  MONGODB_URI=mongodb+srv://YOUR_USER:YOUR_PASS@...                   │
+│                                                                         │
+│  Replace:                                                               │
+│    • YOUR_USER with your MongoDB database username                    │
+│    • YOUR_PASS with your MongoDB database password                    │
+│    • cluster... with your actual cluster identifier                   │
+└─────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│ STEP 3: Update v0 Settings                                              │
+│ ─────────────────────────────────────────────────────────────────────── │
+│                                                                         │
+│  1. Click Settings button (top right of v0)                           │
+│  2. Go to Vars tab                                                    │
+│  3. Find or create MONGODB_URI                                        │
+│  4. Paste your real connection string                                 │
+│  5. Save                                                               │
+│                                                                         │
+│  Then restart server:                                                  │
+│  cd kalakar-ai/server && npm run dev                                  │
+└─────────────────────────────────────────────────────────────────────────┘
+
+
+═══════════════════════════════════════════════════════════════════════════════
+
+                         HOW TO FIND YOUR URI
+
+MONGODB ATLAS:
+┌────────────────────────────────────────────────────────────────────┐
+│ 1. Log in to https://mongodb.com/cloud/atlas                       │
+│ 2. Click "Databases"                                               │
+│ 3. Find your cluster                                               │
+│ 4. Click "Connect" button                                          │
+│ 5. Click "Drivers"                                                 │
+│ 6. Copy the connection string                                      │
+│    Look for: mongodb+srv://...                                     │
+└────────────────────────────────────────────────────────────────────┘
+
+THE URI WILL LOOK LIKE:
+┌────────────────────────────────────────────────────────────────────┐
+│ mongodb+srv://admin:mySecretPassword@cluster0.abc123.mongodb.net/  │
+│ quicksubs?retryWrites=true&w=majority                              │
+└────────────────────────────────────────────────────────────────────┘
+
+
+═══════════════════════════════════════════════════════════════════════════════
+
+                        VERIFY IT WORKED
+
+After updating .env and restarting server, you should see:
+
+✅ WORKING:
+   ✅ MongoDB connected: cluster0.xxxxx.mongodb.net
+
+❌ STILL BROKEN:
+   ❌ MongoDB connection error: ENOTFOUND...
+
+If still broken:
+  1. Did you update BOTH .env AND v0 Settings?
+  2. Is your IP whitelisted in MongoDB Atlas?
+  3. Did you copy the whole connection string?
+  4. Are you using correct username/password?
+
+
+═══════════════════════════════════════════════════════════════════════════════
+
+                          MONGODB ATLAS SETUP
+
+Step-by-Step Screenshots Guide:
+
+1. SIGN UP
+   └─ Go to https://www.mongodb.com/cloud/atlas
+   └─ Click "Sign Up Free"
+   └─ Create account with email
+
+2. CREATE CLUSTER
+   └─ Click "Create a Deployment"
+   └─ Select "M0" tier (free!)
+   └─ Choose region closest to you
+   └─ Click "Create Cluster"
+   └─ Wait 2-3 minutes for setup
+
+3. CREATE DATABASE USER
+   └─ Go to "Database Access" (left menu)
+   └─ Click "Add New Database User"
+   └─ Username: (choose something like 'quicksubs_user')
+   └─ Password: (strong password)
+   └─ Click "Add User"
+
+4. WHITELIST YOUR IP
+   └─ Go to "Network Access" (left menu)
+   └─ Click "Add IP Address"
+   └─ Choose "Allow access from anywhere" (or add your IP)
+   └─ Click "Confirm"
+
+5. GET CONNECTION STRING
+   └─ Go to "Databases" → Your Cluster
+   └─ Click "Connect" button
+   └─ Click "Drivers"
+   └─ Select "Node.js" version "4.x or later"
+   └─ Copy the connection string
+   └─ Replace <username> and <password> with your database user
+
+
+═══════════════════════════════════════════════════════════════════════════════
+
+                        QUICK REFERENCE - PLACEHOLDERS
+
+PLACEHOLDER:
+  mongodb+srv://user:password@cluster.mongodb.net/...
+
+ACTUAL (EXAMPLE):
+  mongodb+srv://quicksubs_user:SecurePass123@cluster0.a1b2c3.mongodb.net/quicksubs?retryWrites=true&w=majority
+
+YOUR ACTUAL ONE:
+  (You'll get from MongoDB Atlas - unique to your account)
+
+
+═══════════════════════════════════════════════════════════════════════════════
+
+                    🎉 YOU'RE DONE! NEXT STEPS
+
+After MongoDB connects:
+
+1. Start the frontend:
+   cd kalakar-ai/app && npm run dev
+
+2. Open http://localhost:5173 in your browser
+
+3. Login with test credentials:
+   Email: sg946511@gmail.com
+   Password: Jlkufkgb
+
+4. Start uploading videos and generating captions!
+
+═══════════════════════════════════════════════════════════════════════════════

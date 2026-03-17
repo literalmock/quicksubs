@@ -1,0 +1,158 @@
+════════════════════════════════════════════════════════════════════════════════
+                    MONGODB CONNECTION ERROR - FIXED
+════════════════════════════════════════════════════════════════════════════════
+
+PROBLEM IDENTIFIED:
+──────────────────────────────────────────────────────────────────────────────
+Error: ❌ MongoDB connection error: querySrv ENOTFOUND _mongodb._tcp.cluster.mongodb.net
+
+Root Cause: Your .env file uses a PLACEHOLDER MongoDB URI instead of your REAL
+connection string from MongoDB Atlas (or local MongoDB).
+
+════════════════════════════════════════════════════════════════════════════════
+                              WHAT WAS FIXED
+════════════════════════════════════════════════════════════════════════════════
+
+1. ✅ Enhanced database config (src/config/db.js)
+   → Better error messages to help diagnose MongoDB issues
+   → Validates URI format before connection attempt
+   → Provides helpful troubleshooting tips
+
+2. ✅ Updated .env file template (server/.env)
+   → Clear instructions for getting MongoDB URI
+   → Step-by-step guide for MongoDB Atlas setup
+   → Examples of different connection strings
+
+3. ✅ Created 2 new documentation files
+   → MONGODB_SETUP.md - Complete setup guide (225 lines)
+   → FIX_MONGODB_ERROR.md - Quick reference (112 lines)
+
+════════════════════════════════════════════════════════════════════════════════
+                           HOW TO FIX (2 MINUTES)
+════════════════════════════════════════════════════════════════════════════════
+
+STEP 1: Get Your Real MongoDB URI
+─────────────────────────────────────────────────────────────────────────────
+Option A - MongoDB Atlas (Cloud - Recommended):
+  1. Go to https://www.mongodb.com/cloud/atlas
+  2. Sign up (free tier available)
+  3. Create cluster
+  4. Click "Connect" → Copy connection string
+  5. Add your IP to Network Access whitelist
+
+Option B - Local MongoDB:
+  1. Install MongoDB locally
+  2. Use: mongodb://localhost:27017/quicksubs
+
+STEP 2: Update .env File
+─────────────────────────────────────────────────────────────────────────────
+File: kalakar-ai/server/.env
+
+Replace:
+  MONGODB_URI=mongodb+srv://user:password@cluster.mongodb.net/...
+
+With YOUR actual connection string:
+  MONGODB_URI=mongodb+srv://YOUR_USER:YOUR_PASS@cluster0.xxxxx.mongodb.net/quicksubs?retryWrites=true&w=majority
+
+STEP 3: Update v0 Settings
+─────────────────────────────────────────────────────────────────────────────
+1. Click Settings button (top right)
+2. Go to Vars tab
+3. Update MONGODB_URI with your real connection string
+4. Save
+
+STEP 4: Restart Server
+─────────────────────────────────────────────────────────────────────────────
+cd kalakar-ai/server && npm run dev
+
+You should see:
+  ✅ MongoDB connected: cluster0.xxxxx.mongodb.net
+
+════════════════════════════════════════════════════════════════════════════════
+                           COMMON ISSUES & FIXES
+════════════════════════════════════════════════════════════════════════════════
+
+ERROR: Still seeing ENOTFOUND error
+─────────────────────────────────────────────────────────────────────────────
+Cause: Using placeholder URI
+Fix:
+  1. Copy REAL MongoDB URI from MongoDB Atlas
+  2. Update both .env file AND v0 Settings
+  3. Restart server
+
+ERROR: authentication failed
+─────────────────────────────────────────────────────────────────────────────
+Cause: Wrong username/password in URI
+Fix:
+  1. Go to MongoDB Atlas → Database Access
+  2. Reset password for your database user
+  3. Update .env with correct credentials
+
+ERROR: IP not whitelisted (MongoDB Atlas only)
+─────────────────────────────────────────────────────────────────────────────
+Cause: Your IP not added to MongoDB network access
+Fix:
+  1. Go to MongoDB Atlas → Network Access
+  2. Click "Add IP Address"
+  3. Use "Allow access from anywhere" or add your specific IP
+
+ERROR: connect ECONNREFUSED (Local MongoDB)
+─────────────────────────────────────────────────────────────────────────────
+Cause: MongoDB service not running
+Fix:
+  macOS:    brew services start mongodb-community
+  Linux:    sudo systemctl start mongod
+  Windows:  Start MongoDB Community Server from Services
+
+════════════════════════════════════════════════════════════════════════════════
+                          MONGODB URI REFERENCE
+════════════════════════════════════════════════════════════════════════════════
+
+MongoDB Atlas (Cloud):
+  mongodb+srv://user:pass@cluster.xxxxx.mongodb.net/dbname?retryWrites=true&w=majority
+
+Local MongoDB:
+  mongodb://localhost:27017/quicksubs
+
+Local with auth:
+  mongodb://user:pass@localhost:27017/quicksubs?authSource=admin
+
+Docker:
+  mongodb://mongodb:27017/quicksubs
+
+════════════════════════════════════════════════════════════════════════════════
+                            NEXT STEPS
+════════════════════════════════════════════════════════════════════════════════
+
+After MongoDB connects:
+
+1. ✅ Start the frontend:
+   cd kalakar-ai/app && npm run dev
+
+2. ✅ Open http://localhost:5173
+
+3. ✅ Login with test account:
+   Email: sg946511@gmail.com
+   Password: Jlkufkgb
+
+4. ✅ Start uploading videos!
+
+════════════════════════════════════════════════════════════════════════════════
+                         DOCUMENTATION FILES
+════════════════════════════════════════════════════════════════════════════════
+
+Quick Reference:    FIX_MONGODB_ERROR.md (112 lines - 2 min read)
+Complete Guide:     MONGODB_SETUP.md (225 lines - 10 min read)
+This Summary:       MONGODB_ERROR_FIXED.txt (this file)
+
+════════════════════════════════════════════════════════════════════════════════
+
+Questions? Check the error messages - they're designed to help you!
+
+The enhanced error messages in db.js will tell you:
+  ✓ If MONGODB_URI is missing
+  ✓ If it's still a placeholder
+  ✓ What might be wrong with the connection
+  ✓ How to troubleshoot
+
+✅ YOU'RE ALL SET - Just get your MongoDB URI and update .env!
