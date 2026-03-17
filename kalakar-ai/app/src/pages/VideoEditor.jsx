@@ -428,6 +428,7 @@ const VideoEditor = () => {
               onPause={() => setIsPlaying(false)}
               onPlay={() => setIsPlaying(true)}
               onUpdateStyle={updateSubtitleStyle}
+              currentTime={currentTime}
             />
           </div>
         </main>

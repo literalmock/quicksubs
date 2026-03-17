@@ -38,8 +38,8 @@ export const normalizeSubtitle = (subtitle, index = 0) => {
 export const normalizeToLatin = (value) => {
   const text = String(value || '')
     .replace(/\r?\n+/g, ' ')
-    .replace(/[“”]/g, '"')
-    .replace(/[‘’]/g, "'")
+    .replace(/[""]/g, '"')
+    .replace(/['']/g, "'")
     .replace(/[/|]+/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
@@ -143,12 +143,11 @@ const toAssTime = (seconds) => {
 
 
 export const subtitlesToAss = (subtitles, vw = 1920, vh = 1080) => {
-  // Build one ASS style per unique theme used — so each theme gets correct font/color/outline
+  // Build one ASS style per unique theme used
   const usedKeys = [...new Set(['classic', ...subtitles.map((s) => s.style?.theme || 'classic')])];
 
   const styleLines = usedKeys.map((key) => {
     const t = CAPTION_THEMES[key] || CAPTION_THEMES.classic;
-    // Find the first subtitle using this theme to pick up any user overrides
     const rep = subtitles.find((s) => (s.style?.theme || 'classic') === key);
     const rst = rep?.style || {};
     const fontName = extractFirstFont(rst.fontFamily || t.fontFamily);
@@ -157,20 +156,23 @@ export const subtitlesToAss = (subtitles, vw = 1920, vh = 1080) => {
     const bold = t.fontWeight === '900' || t.fontWeight === '700' ? 1 : 0;
     const spacing = parseFloat(t.letterSpacing) || 0;
 
-    // BorderStyle 3 = opaque box. ASS spec: the box fill color comes from
-    // OutlineColour (NOT BackColour). BackColour is the shadow color.
+    const isAliAbdaal = key === 'aliAbdaal';
     const hasBox = !!t.background;
-    const borderStyle = hasBox ? 3 : 1;
-    // WebKitTextStroke draws internally and externally (centered stroke),
-    // so a 5px WebKit stroke is only 2.5px visible outside the font.
-    // ASS Outline draws entirely outside. To match the visible stroke thickness
-    // exactly, we must divide the strokeWidth by 2.
-    const outline = hasBox ? 10 : ((t.strokeWidth ?? 2) / 2);
-    const shadow = hasBox ? 0 : 1;
-    const outlineColor = hasBox
-      ? hexToAssBGR(t.background)          // box fill = gold
-      : hexToAssBGR(rst.stroke ?? t.stroke); // normal stroke color
-    const backColor = hasBox ? '&H80000000' : '&H80000000';  // shadow color
+    // Ali Abdaal: BorderStyle 1 (no box from ASS) — we can't easily do white pill box
+    // in ASS, so we use BorderStyle 1 with white outline as a fake box border.
+    // The white box render is approximated with OutlineColour=white and larger outline.
+    const borderStyle = isAliAbdaal ? 1 : hasBox ? 3 : 1;
+    const outline = isAliAbdaal
+      ? 8   // thick white outline approximates the box
+      : hasBox ? 10 : ((t.strokeWidth ?? 2) / 2);
+    const shadow = isAliAbdaal ? 0 : hasBox ? 0 : 1;
+    // For Ali Abdaal, OutlineColour = white (approximates the box)
+    const outlineColor = isAliAbdaal
+      ? hexToAssBGR('#FFFFFF')
+      : hasBox
+      ? hexToAssBGR(t.background)
+      : hexToAssBGR(rst.stroke ?? t.stroke);
+    const backColor = isAliAbdaal ? '&H00FFFFFF' : '&H80000000';
 
     return `Style: ${key},${fontName},${fs},${primaryColor},&H000000FF,${outlineColor},${backColor},${bold},0,0,0,100,100,${spacing},0,${borderStyle},${outline},${shadow},2,10,10,30,1`;
   }).join('\n');
@@ -197,33 +199,75 @@ export const subtitlesToAss = (subtitles, vw = 1920, vh = 1080) => {
       const themeKey = st.theme || 'classic';
       const theme = CAPTION_THEMES[themeKey] || CAPTION_THEMES.classic;
 
-      // Apply theme text transform
       let text = normalizeToLatin(sub.text);
       if (theme.textTransform === 'uppercase') text = text.toUpperCase();
 
-      // Apply word-split multi-line (\N = hard line break in ASS)
-      if (theme.wordSplit) {
-        const chunks = splitToWordChunks(text, theme.wordsPerLine ?? 2);
-        text = chunks.join('\\N');
-      }
-
-      // Per-subtitle overrides — emit inline tags only for values that differ
-      // from the ASS Style line (which already carries the theme defaults)
-      
-      // Calculate exact center position based on percentages
       const posX = Math.round((st.xPct !== undefined ? st.xPct : 0.5) * vw);
       const posY = Math.round((st.yPct !== undefined ? st.yPct : 0.9) * vh);
       const alignment = positionToAssAlignment(st.position);
-
       const overrides = [`\\an${alignment}`, `\\pos(${posX},${posY})`];
 
       const repSt = subtitles.find((s2) => (s2.style?.theme || 'classic') === themeKey)?.style || {};
       if (st.fontSize && st.fontSize !== (repSt.fontSize ?? theme.fontSize)) overrides.push(`\\fs${st.fontSize}`);
       if (st.color && st.color !== (repSt.color ?? theme.color)) overrides.push(`\\1c${hexToAssColor(st.color)}`);
-      // For themes with background box (BorderStyle 3), OutlineColour = box fill,
-      // so only emit \3c override for normal outline themes.
       if (!theme.background && st.stroke && st.stroke !== (repSt.stroke ?? theme.stroke)) {
         overrides.push(`\\3c${hexToAssColor(st.stroke)}`);
+      }
+
+      // ── Ali Abdaal: word-by-word color switch gray → black ──────────
+      // Each word starts in gray (secondaryColor), then at the word's start
+      // time instantly switches to dark (activeColor). We emit one Dialogue
+      // line per word with colour override so libass/FFmpeg renders it right.
+      // This produces: past words = dark, current word = dark, future = gray.
+      if (themeKey === 'aliAbdaal') {
+        const activeAss    = hexToAssColor(theme.activeColor    || '#111111');
+        const secondaryAss = hexToAssColor(theme.secondaryColor || '#9CA3AF');
+
+        const wordItems = Array.isArray(sub.words) && sub.words.length
+          ? sub.words
+          : (() => {
+              const tokens = text.split(/\s+/).filter(Boolean);
+              const dur = sub.end - sub.start;
+              return tokens.map((w, i) => ({
+                word: w,
+                start: sub.start + (dur * i) / Math.max(tokens.length, 1),
+                end: i === tokens.length - 1
+                  ? sub.end
+                  : sub.start + (dur * (i + 1)) / Math.max(tokens.length, 1),
+              }));
+            })();
+
+        // Strategy: output the full caption once, coloring each word based on
+        // whether it is before, at, or after the active word.
+        // We approximate this with \k karaoke: each word emits a \k tag for
+        // its duration. Before its time it uses secondaryColor, during/after
+        // it uses activeColor (\kf sweeps primary→secondary, use \k for instant).
+        //
+        // Exact approach: all words start grey (\1c secondary). Then for each
+        // word position we emit a \k block. As karaoke time ticks through,
+        // the word at the front gets the primary colour automatically.
+        // We set Primary = activeColor, Secondary = secondaryColor in the
+        // style so that \k correctly switches from secondary to primary.
+        const kText = wordItems
+          .map((w) => {
+            const durCs = Math.max(1, Math.round((w.end - w.start) * 100));
+            const word = String(w.word ?? w.text ?? '').trim();
+            // \ko = clear, then primary; all unsung = secondary via SecondaryColour
+            return `{\\k${durCs}}${word}`;
+          })
+          .join(' ');
+
+        // Override style: Primary = active (dark), Secondary = gray.
+        // SecondaryColour in the style line is &H000000FF by default;
+        // we override via \2c here.
+        const tags = `{${overrides.join('')}\\1c${secondaryAss}\\2c${activeAss}}`;
+        return `Dialogue: 0,${toAssTime(sub.start)},${toAssTime(sub.end)},${themeKey},,0,0,0,karaoke,${tags}${kText}`;
+      }
+
+      // ── Regular themes ─────────────────────────────────────────────
+      if (theme.wordSplit) {
+        const chunks = splitToWordChunks(text, theme.wordsPerLine ?? 2);
+        text = chunks.join('\\N');
       }
 
       const tags = `{${overrides.join('')}}`;

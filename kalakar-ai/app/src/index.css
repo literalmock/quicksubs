@@ -36,3 +36,90 @@
     @apply bg-surface-900 text-white font-sans antialiased;
   }
 }
+
+/* ─────────────────────────────────────────────────────
+   Caption Effect Animations
+───────────────────────────────────────────────────── */
+
+/* Fade In */
+.caption-effect--fade {
+  animation: captionFadeIn 0.4s ease-out both;
+}
+@keyframes captionFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Slide Up */
+.caption-effect--slide-up {
+  animation: captionSlideUp 0.4s ease-out both;
+}
+@keyframes captionSlideUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Scale Bounce */
+.caption-effect--scale-bounce {
+  animation: captionScaleBounce 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+@keyframes captionScaleBounce {
+  from { opacity: 0; transform: scale(0.85); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* Word Pop (active word pulses) */
+.caption-effect--word-pop .caption-word--pop {
+  animation: wordPop 0.25s ease-out both;
+  display: inline-block;
+}
+@keyframes wordPop {
+  0%   { transform: scale(0.94); }
+  60%  { transform: scale(1.06); }
+  100% { transform: scale(1); }
+}
+
+/* Highlight Sweep */
+.caption-effect--highlight-sweep .caption-word--sweep {
+  animation: highlightSweep 0.5s ease-out both;
+  display: inline-block;
+}
+@keyframes highlightSweep {
+  from { filter: brightness(2.5); }
+  to   { filter: brightness(1); }
+}
+
+/* ─────────────────────────────────────────────────────
+   Ali Abdaal Effect
+   Signature: clean fade-up + subtle scale settle
+   Active word highlighted in gold (#FFD60A)
+───────────────────────────────────────────────────── */
+.caption-effect--ali-abdaal {
+  animation: aliAbdaalIn 0.4s ease-out both;
+}
+
+@keyframes aliAbdaalIn {
+  0% {
+    opacity: 0;
+    transform: translateY(8px) scale(0.985);
+  }
+  65% {
+    opacity: 1;
+    transform: translateY(0) scale(1.008);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Active word subtle scale for Ali Abdaal theme */
+.caption-word--ali-active {
+  display: inline-block;
+  animation: aliWordPulse 0.12s ease-out both;
+}
+@keyframes aliWordPulse {
+  from { transform: scale(1); }
+  50%  { transform: scale(1.04); }
+  to   { transform: scale(1); }
+}

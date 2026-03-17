@@ -1,411 +1,216 @@
 {
-  "videoId": "69b897aa0209a4186b84e37f",
-  "provider": "elevenlabs",
+  "videoId": "69b9bd4081ef21be30310d68",
+  "provider": "groq",
   "language": "hinglish",
-  "timestamp": "2026-03-17T06:01:21.043Z",
+  "timestamp": "2026-03-17T20:45:31.571Z",
   "quality": {
     "approved": true,
-    "overallScore": 0.893,
-    "avgCaptionConfidence": 0.893,
-    "lowConfidenceCaptions": 1,
-    "suspiciousTokenCount": 0,
+    "overallScore": 0.937,
+    "avgCaptionConfidence": 0.958,
+    "lowConfidenceCaptions": 0,
+    "suspiciousTokenCount": 2,
     "hasDevanagari": false,
     "hasNonAscii": false,
     "manualReviewCount": 0,
-    "primaryProvider": "elevenlabs",
-    "secondaryProvider": null,
+    "primaryProvider": "groq",
+    "secondaryProvider": "elevenlabs",
     "verifierProvider": "deepseek",
     "verifierModel": "deepseek-chat",
     "issues": [
-      "No secondary transcript for cross-checking.",
-      "Some Hindi phrases may need verification for exact wording (e.g., 'mere ko to bilkul lagta hai' vs 'mujhe to bilkul lagta hai').",
-      "Potential minor grammatical adjustments in Hindi parts.",
-      "Possible context needed for 'Bank ho jaaye' - could be 'bank ho jaaye' (become a bank) or 'bail ho jaaye' (get bail). Kept as 'Bank' based on primary evidence.",
-      "Some phrases like 'paise three times, four times na hon' may need context for precise meaning.",
-      "Fragment 'Kam Absolutely.' appears to be a mishearing or incomplete phrase. Could be 'Kam absolutely' (less absolutely) or a cut-off word.",
-      "Initial 'Par- aa hi yeh maan ke' might be 'Par aahi yeh maan ke' or similar - unclear from context.",
-      "Uncertain translation of 'पोल' (pol) - could be 'pool' or 'pole' or misheard word",
-      "Mixed Hindi-English phrasing may need verification for naturalness",
-      "No secondary transcript for cross-checking"
+      "Primary caption has 'hi bhi samajh aati' but secondary suggests 'hi nahi samajh aati'. Corrected to 'hi nahi' based on secondary.",
+      "Primary caption has 'yahi ni' but secondary suggests 'yahi nahi'. Corrected to 'yahi nahi'.",
+      "Primary caption has 'na aapko kuch kuch' and 'na kuch kuch' patterns. Secondary suggests 'kuch na kuch' pattern. Corrected to match secondary for consistency.",
+      "Timing alignment: Secondary captions have different segmentation and timing. Using primary timing as instructed.",
+      "Primary transcript had word order 'get please' which appears reversed in secondary transcript. Secondary transcript includes 'least' which is missing in primary. Used secondary wording for better clarity while preserving primary timing."
     ]
   },
   "raw": {
-    "primaryProvider": "elevenlabs",
-    "primaryText": "Ayush, so what do you think जो big cap investors थे, जो Delhi से Dubai shift हो गए थे for their investments. After this war and ongoing situation, do you think कि वो वापस Delhi NCR की तरफ investment के बारे में सोच सकते हैं? मेरे को तो बिल्कुल लगता है। क्योंकि आज अगर हम यह चीज देखें कि जिसका पैसा बाहर जा रहा है India से, Dubai अगर कोई बंदा पैसा अपना invest कर रहा है और जो भी Dubai के अंदर हुआ, तो उससे हर किसी के sentiments तो hurt होते ही होते हैं। Very true, very true. और इस समय जो situations हमें भी पता है और जो news हम भी सुनते हैं कि लोग आ नहीं पा रहे और जो turmoil वहां पर इस समय है, situation है बहुत खराब। और investor को अपने पैसे three times, four times ना हों, जो वो Dubai जाकर कर रहे थे, उनका पैसा बच जाए वो भी बहुत बड़ी बात है। Bank हो जाए, सही बात है। और insecurity जो investor को हो जाती है वो किसी भी point पर- आ ही यह मान के चलो कि अपना पैसा आपने बाहर invest कर दिया, आप बाहर ही नहीं जा पा रहे तो अपना पैसा लेकर कैसे आओगे? Absolutely. कम से कम अपनी country के अंदर अगर पैसा लगा हुआ है उसका, चाहे Greater Noida, Noida, Yamuna, Gurgaon हो, उसका पैसा उसे दिख तो रहा है ना कि उसके पास है। वो कभी भी जाकर अपनी गाड़ी से जा तो सकता है ना कभी भी वहां पर और चीजें कर भी सकता है वो अपने लिए। Multiple times पैसा उसका पोल ना हो। But हम यह जरूर कह सकते हैं कि हां investment safe है। Real estate का मतलब ही investment safe करने का ही था। बिल्कुल। कि पैसा एक के दो हो जाए, तीन हो जाए, चार हो जाए वो अगर लालच किसी का बढ़ा है, उसे तो फिर कभी कुछ मिला ही नहीं है। लोगों के ऊपर depend करता है कि उन्हें पैसा अपना बाहर invest करना है या फिर वो India आते हैं और हमसे बात करें।",
+    "primaryProvider": "groq",
+    "primaryText": "Are you tired of brokers wasting your time? Har weekend pe, har samay aapko kuch na kuch options, kuch na kuch photographs, kuch na kuch details aati rehti hai. Well, I know and I empathize with you because kai brokers ko aapki requirement hi bhi samajh aati. Kai brokers yahi ni samajh paate ki aapko chahiye kya, aapko kya sensitivity hai, aur aapki parivaar ki kya zarurat hai. Well, in case you're looking for homes in the least amount of site visits, please get in touch with me. I'll filter things out for you.",
     "primaryCaptions": [
       {
-        "start": 0.28,
-        "end": 1.259,
-        "text": "Ayush, so what do you think",
-        "lines": 1
-      },
-      {
-        "start": 1.36,
-        "end": 3.199,
-        "text": "जो big cap investors थे, जो",
-        "lines": 1
-      },
-      {
-        "start": 3.22,
-        "end": 5.039,
-        "text": "Delhi से Dubai shift हो गए",
-        "lines": 1
-      },
-      {
-        "start": 5.059,
-        "end": 7.239,
-        "text": "थे for their investments. After this",
+        "start": 0,
+        "end": 2.5,
+        "text": "Are you tired of brokers wasting your time?",
         "lines": 2
       },
       {
-        "start": 7.339,
-        "end": 9.539,
-        "text": "war and ongoing situation, do you",
+        "start": 2.5,
+        "end": 4.28,
+        "text": "Har weekend pe, har samay na aapko kuch kuch options,",
         "lines": 2
       },
       {
-        "start": 9.559,
-        "end": 11,
-        "text": "think कि वो वापस Delhi NCR",
-        "lines": 1
-      },
-      {
-        "start": 11.06,
-        "end": 12.019,
-        "text": "की तरफ investment के बारे में",
+        "start": 4.28,
+        "end": 6.0600000000000005,
+        "text": "kuch na kuch photographs, na kuch kuch details aati rehti",
         "lines": 2
       },
       {
-        "start": 12.039,
-        "end": 13.699,
-        "text": "सोच सकते हैं? मेरे को तो",
+        "start": 6.0600000000000005,
+        "end": 7.84,
+        "text": "hai.",
         "lines": 1
       },
       {
-        "start": 13.719,
-        "end": 16.279,
-        "text": "बिल्कुल लगता है। क्योंकि आज अगर",
+        "start": 7.84,
+        "end": 10.92,
+        "text": "Well, I know and I empathize with you because kai brokers",
         "lines": 2
       },
       {
-        "start": 16.28,
-        "end": 18.219,
-        "text": "हम यह चीज देखें कि जिसका",
-        "lines": 1
-      },
-      {
-        "start": 18.319,
-        "end": 19.519,
-        "text": "पैसा बाहर जा रहा है India",
-        "lines": 1
-      },
-      {
-        "start": 19.6,
-        "end": 21.42,
-        "text": "से, Dubai अगर कोई बंदा पैसा",
-        "lines": 1
-      },
-      {
-        "start": 21.46,
-        "end": 23.78,
-        "text": "अपना invest कर रहा है और",
-        "lines": 1
-      },
-      {
-        "start": 23.859,
-        "end": 25.12,
-        "text": "जो भी Dubai के अंदर हुआ,",
-        "lines": 1
-      },
-      {
-        "start": 25.12,
-        "end": 26.379,
-        "text": "तो उससे हर किसी के sentiments",
+        "start": 10.92,
+        "end": 14,
+        "text": "ko aapki requirement hi bhi samajh aati.",
         "lines": 2
       },
       {
-        "start": 26.439,
-        "end": 27.02,
-        "text": "तो hurt होते ही होते हैं।",
-        "lines": 1
-      },
-      {
-        "start": 27.02,
-        "end": 29.34,
-        "text": "Very true, very true. और इस",
-        "lines": 1
-      },
-      {
-        "start": 29.42,
-        "end": 31.04,
-        "text": "समय जो situations हमें भी पता",
+        "start": 14,
+        "end": 16.08,
+        "text": "Kai brokers yahi ni samajh paate ki aapko chahiye kya,",
         "lines": 2
       },
       {
-        "start": 31.099,
-        "end": 32.04,
-        "text": "है और जो news हम भी",
-        "lines": 1
-      },
-      {
-        "start": 32.1,
-        "end": 33.1,
-        "text": "सुनते हैं कि लोग आ नहीं",
-        "lines": 1
-      },
-      {
-        "start": 33.139,
-        "end": 34.959,
-        "text": "पा रहे और जो turmoil वहां",
-        "lines": 1
-      },
-      {
-        "start": 35.02,
-        "end": 36.92,
-        "text": "पर इस समय है, situation है",
-        "lines": 1
-      },
-      {
-        "start": 36.979,
-        "end": 38.779,
-        "text": "बहुत खराब। और investor को अपने",
+        "start": 16.08,
+        "end": 18.159999999999997,
+        "text": "aapko kya sensitivity hai, aur aapki parivaar ki kya",
         "lines": 2
       },
       {
-        "start": 38.879,
-        "end": 41.72,
-        "text": "पैसे three times, four times ना",
+        "start": 18.159999999999997,
+        "end": 20.24,
+        "text": "zarurat hai.",
+        "lines": 1
+      },
+      {
+        "start": 20.24,
+        "end": 22.633333333333333,
+        "text": "Well, in case you're looking for homes in the least",
         "lines": 2
       },
       {
-        "start": 41.799,
-        "end": 43.36,
-        "text": "हों, जो वो Dubai जाकर कर",
-        "lines": 1
-      },
-      {
-        "start": 43.42,
-        "end": 44.479,
-        "text": "रहे थे, उनका पैसा बच जाए",
-        "lines": 1
-      },
-      {
-        "start": 44.52,
-        "end": 45.02,
-        "text": "वो भी बहुत बड़ी बात है।",
-        "lines": 1
-      },
-      {
-        "start": 45.04,
-        "end": 46.279,
-        "text": "Bank हो जाए, सही बात है।",
-        "lines": 1
-      },
-      {
-        "start": 46.34,
-        "end": 47.9,
-        "text": "और insecurity जो investor को हो",
+        "start": 22.633333333333333,
+        "end": 25.026666666666667,
+        "text": "amount of site visits, get please in touch with me.",
         "lines": 2
       },
       {
-        "start": 47.959,
-        "end": 49.099,
-        "text": "जाती है वो किसी भी point",
-        "lines": 1
-      },
+        "start": 25.026666666666667,
+        "end": 27.42,
+        "text": "I'll filter things out for you.",
+        "lines": 2
+      }
+    ],
+    "secondaryProvider": "elevenlabs",
+    "secondaryText": "Are you tired of brokers wasting your time? हर weekend पे हर समय आपको कुछ ना कुछ options, कुछ ना कुछ photographs, कुछ ना कुछ details आती रहती हैं। Well, I know and I empathize with you because कई brokers को आपकी requirement ही नहीं समझ आती। कई brokers यही नहीं समझ पाते कि आपको चाहिए क्या, आपका क्या sensitivity है और आपके परिवार की क्या जरूरत है। Well, in case you are looking for homes in the least amount of site visits, please get in touch with me. I'll filter things out for you.",
+    "secondaryCaptions": [
       {
-        "start": 49.239,
-        "end": 49.84,
-        "text": "पर- आ ही यह मान के",
-        "lines": 1
-      },
-      {
-        "start": 49.939,
-        "end": 52.099,
-        "text": "चलो कि अपना पैसा आपने बाहर",
-        "lines": 1
-      },
-      {
-        "start": 52.139,
-        "end": 53.119,
-        "text": "invest कर दिया, आप बाहर ही",
-        "lines": 1
-      },
-      {
-        "start": 53.159,
-        "end": 53.799,
-        "text": "नहीं जा पा रहे तो अपना",
-        "lines": 1
-      },
-      {
-        "start": 53.84,
-        "end": 55.34,
-        "text": "पैसा लेकर कैसे आओगे? कम Absolutely.",
+        "start": 0.099,
+        "end": 1.959,
+        "text": "Are you tired of brokers wasting",
         "lines": 2
       },
       {
-        "start": 55.42,
-        "end": 56.7,
-        "text": "से कम अपनी country के अंदर",
+        "start": 2,
+        "end": 3.739,
+        "text": "your time? हर weekend पे हर",
         "lines": 1
       },
       {
-        "start": 56.759,
-        "end": 58.239,
-        "text": "अगर पैसा लगा हुआ है उसका,",
+        "start": 3.839,
+        "end": 5.399,
+        "text": "समय आपको कुछ ना कुछ options,",
         "lines": 1
       },
       {
-        "start": 58.419,
-        "end": 61.159,
-        "text": "चाहे Greater Noida, Noida, Yamuna, Gurgaon",
+        "start": 5.42,
+        "end": 6.639,
+        "text": "कुछ ना कुछ photographs, कुछ ना",
         "lines": 2
       },
       {
-        "start": 61.18,
-        "end": 62.119,
-        "text": "हो, उसका पैसा उसे दिख तो",
-        "lines": 1
-      },
-      {
-        "start": 62.139,
-        "end": 62.86,
-        "text": "रहा है ना कि उसके पास",
-        "lines": 1
-      },
-      {
-        "start": 62.899,
-        "end": 63.86,
-        "text": "है। वो कभी भी जाकर अपनी",
-        "lines": 1
-      },
-      {
-        "start": 63.899,
-        "end": 64.739,
-        "text": "गाड़ी से जा तो सकता है",
-        "lines": 1
-      },
-      {
-        "start": 64.76,
-        "end": 65.539,
-        "text": "ना कभी भी वहां पर और",
-        "lines": 1
-      },
-      {
-        "start": 65.599,
-        "end": 66.299,
-        "text": "चीजें कर भी सकता है वो",
-        "lines": 1
-      },
-      {
-        "start": 66.339,
-        "end": 68.339,
-        "text": "अपने लिए। Multiple times पैसा उसका",
+        "start": 6.659,
+        "end": 8.599,
+        "text": "कुछ details आती रहती हैं। Well,",
         "lines": 2
       },
       {
-        "start": 68.379,
-        "end": 69.799,
-        "text": "पोल ना हो। But हम यह",
+        "start": 8.68,
+        "end": 10.18,
+        "text": "I know and I empathize with",
         "lines": 1
       },
       {
-        "start": 69.86,
-        "end": 71.519,
-        "text": "जरूर कह सकते हैं कि हां",
-        "lines": 1
-      },
-      {
-        "start": 71.58,
-        "end": 73.699,
-        "text": "investment safe है। Real का estate",
+        "start": 10.22,
+        "end": 12.42,
+        "text": "you because कई brokers को आपकी",
         "lines": 2
       },
       {
-        "start": 73.739,
-        "end": 75.119,
-        "text": "मतलब ही investment safe करने का",
+        "start": 12.479,
+        "end": 14.46,
+        "text": "requirement ही नहीं समझ आती। कई",
         "lines": 2
       },
       {
-        "start": 75.139,
-        "end": 77,
-        "text": "ही था। बिल्कुल। कि पैसा एक",
+        "start": 14.519,
+        "end": 16.159,
+        "text": "brokers यही नहीं समझ पाते कि",
         "lines": 1
       },
       {
-        "start": 77.059,
-        "end": 77.999,
-        "text": "के दो हो जाए, तीन हो",
+        "start": 16.199,
+        "end": 18.479,
+        "text": "आपको चाहिए क्या, आपका क्या sensitivity",
+        "lines": 2
+      },
+      {
+        "start": 18.559,
+        "end": 19.739,
+        "text": "है और आपके परिवार की क्या",
         "lines": 1
       },
       {
-        "start": 78.04,
-        "end": 79.879,
-        "text": "जाए, चार हो जाए वो अगर",
+        "start": 19.799,
+        "end": 21.02,
+        "text": "जरूरत है। Well, in case you",
         "lines": 1
       },
       {
-        "start": 79.979,
-        "end": 81.479,
-        "text": "लालच किसी का बढ़ा है, उसे",
+        "start": 21.02,
+        "end": 22.479,
+        "text": "are looking for homes in the",
         "lines": 1
       },
       {
-        "start": 81.5,
-        "end": 82.319,
-        "text": "तो फिर कभी कुछ मिला ही",
+        "start": 22.6,
+        "end": 24.18,
+        "text": "least amount of site visits, please",
+        "lines": 2
+      },
+      {
+        "start": 24.22,
+        "end": 25.479,
+        "text": "get in touch with me. I'll",
         "lines": 1
       },
       {
-        "start": 82.379,
-        "end": 83.86,
-        "text": "नहीं है। लोगों के ऊपर depend",
-        "lines": 1
-      },
-      {
-        "start": 83.9,
-        "end": 85.199,
-        "text": "करता है कि उन्हें पैसा अपना",
-        "lines": 1
-      },
-      {
-        "start": 85.36,
-        "end": 86.319,
-        "text": "बाहर invest करना है या फिर",
-        "lines": 1
-      },
-      {
-        "start": 86.36,
-        "end": 87.339,
-        "text": "वो India आते हैं और हमसे",
-        "lines": 1
-      },
-      {
-        "start": 87.379,
-        "end": 88.019,
-        "text": "बात करें।",
+        "start": 25.519,
+        "end": 29.1,
+        "text": "filter things out for you.",
         "lines": 1
       }
     ],
-    "secondaryProvider": null,
-    "secondaryText": null,
-    "secondaryCaptions": [],
     "verifier": {
       "provider": "deepseek",
       "model": "deepseek-chat",
-      "avgConfidence": 0.893,
+      "avgConfidence": 0.958,
       "issues": [
-        "No secondary transcript for cross-checking.",
-        "Some Hindi phrases may need verification for exact wording (e.g., 'mere ko to bilkul lagta hai' vs 'mujhe to bilkul lagta hai').",
-        "Potential minor grammatical adjustments in Hindi parts.",
-        "Possible context needed for 'Bank ho jaaye' - could be 'bank ho jaaye' (become a bank) or 'bail ho jaaye' (get bail). Kept as 'Bank' based on primary evidence.",
-        "Some phrases like 'paise three times, four times na hon' may need context for precise meaning.",
-        "Fragment 'Kam Absolutely.' appears to be a mishearing or incomplete phrase. Could be 'Kam absolutely' (less absolutely) or a cut-off word.",
-        "Initial 'Par- aa hi yeh maan ke' might be 'Par aahi yeh maan ke' or similar - unclear from context.",
-        "Uncertain translation of 'पोल' (pol) - could be 'pool' or 'pole' or misheard word",
-        "Mixed Hindi-English phrasing may need verification for naturalness",
-        "No secondary transcript for cross-checking"
+        "Primary caption has 'hi bhi samajh aati' but secondary suggests 'hi nahi samajh aati'. Corrected to 'hi nahi' based on secondary.",
+        "Primary caption has 'yahi ni' but secondary suggests 'yahi nahi'. Corrected to 'yahi nahi'.",
+        "Primary caption has 'na aapko kuch kuch' and 'na kuch kuch' patterns. Secondary suggests 'kuch na kuch' pattern. Corrected to match secondary for consistency.",
+        "Timing alignment: Secondary captions have different segmentation and timing. Using primary timing as instructed.",
+        "Primary transcript had word order 'get please' which appears reversed in secondary transcript. Secondary transcript includes 'least' which is missing in primary. Used secondary wording for better clarity while preserving primary timing."
       ]
     },
     "secondaryError": null

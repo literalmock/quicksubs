@@ -14,6 +14,7 @@ const VideoCanvas = ({
   onEnded,
   onUpdateStyle,
   onTogglePlay,
+  currentTime = 0,
 }) => {
   const containerRef = useRef(null);
   const [containerSize, setContainerSize] = useState({ width: 800, height: 450 });
@@ -101,6 +102,7 @@ const VideoCanvas = ({
             containerHeight={displayH}
             fontScale={fontScale}
             onUpdateStyle={onUpdateStyle}
+            currentTime={currentTime}
           />
         </div>
       )}

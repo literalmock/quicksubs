@@ -1,7 +1,8 @@
 import { useRef } from 'react';
 import { CAPTION_THEMES, splitToWordChunks } from '../../utils/captionThemes';
 
-const SAFE_AREA_X = 0.1;
+const WORD_EPSILON = 0.02;
+const SAFE_AREA_X = 0.08;
 const SAFE_AREA_Y = 0.08;
 
 const clamp = (value, min, max) => {
@@ -10,38 +11,68 @@ const clamp = (value, min, max) => {
 };
 
 /**
- * HTML/CSS subtitle overlay — renders captions with:
- * - WebkitTextStroke for crisp outlines
- * - textTransform (uppercase for viral/mrbeast themes)
- * - center alignment
- * - multi-line word-split for viral captions
- * - pointer-events drag to reposition
+ * Word timing helpers
+ */
+const fallbackWords = (subtitle) => {
+  const tokens = String(subtitle?.text || '').split(/\s+/).filter(Boolean);
+  const start = Number(subtitle?.start) || 0;
+  const end = Math.max(start + 0.2, Number(subtitle?.end) || start + 0.2);
+  const duration = end - start;
+  return tokens.map((word, i) => ({
+    word,
+    start: start + (duration * i) / Math.max(tokens.length, 1),
+    end: i === tokens.length - 1
+      ? end
+      : start + (duration * (i + 1)) / Math.max(tokens.length, 1),
+  }));
+};
+
+const getActiveWordIndex = (words, currentTime) =>
+  words.findIndex(
+    (w) =>
+      currentTime >= (w.start ?? -Infinity) - WORD_EPSILON &&
+      currentTime <= (w.end ?? Infinity) + WORD_EPSILON
+  );
+
+/**
+ * HTML/CSS subtitle overlay.
+ *
+ * Ali Abdaal mode:
+ *   - White rounded-rectangle background box (pill shape)
+ *   - Words spoken so far (index <= active): dark/black bold
+ *   - Words not yet spoken (index > active): light gray
+ *   - No text stroke (box provides contrast)
  *
  * `fontScale` maps reference-resolution sizes to current display size.
  */
-const SubtitleOverlay = ({ subtitle, containerWidth, containerHeight, fontScale = 1, onUpdateStyle }) => {
+const SubtitleOverlay = ({
+  subtitle,
+  containerWidth,
+  containerHeight,
+  fontScale = 1,
+  onUpdateStyle,
+  currentTime = 0,
+}) => {
   const dragRef = useRef(null);
   const pointerStart = useRef(null);
 
   if (!subtitle) return null;
 
   const st = subtitle.style || {};
-  const theme = CAPTION_THEMES[st.theme] || CAPTION_THEMES.classic;
+  const themeKey = st.theme || 'classic';
+  const theme = CAPTION_THEMES[themeKey] || CAPTION_THEMES.classic;
+  const isAliAbdaal = themeKey === 'aliAbdaal';
 
-  // fontSize / color / stroke / fontFamily are synced into st when theme is selected,
-  // so read directly from st for both live preview and export consistency.
   const fontSize = Math.max(10, Math.round((st.fontSize ?? theme.fontSize) * fontScale));
-  const strokeWidth = Math.max(1, (theme.strokeWidth ?? 2) * fontScale);
+  const strokeWidth = Math.max(0, (theme.strokeWidth ?? 2) * fontScale);
   const textColor = st.color ?? theme.color;
   const strokeColor = st.stroke ?? theme.stroke;
-  // Build CSS font-family: use the bare st.fontFamily name + theme's full fallback stack
   const fontFamily = st.fontFamily
     ? `"${st.fontFamily}", ${theme.fontFamily}`
     : theme.fontFamily;
 
   const rawText = subtitle.text || '';
-  const displayText =
-    theme.textTransform === 'uppercase' ? rawText.toUpperCase() : rawText;
+  const displayText = theme.textTransform === 'uppercase' ? rawText.toUpperCase() : rawText;
 
   const position = st.position || 'bottom';
   const safeInsetX = Math.max(14, containerWidth * SAFE_AREA_X);
@@ -51,23 +82,29 @@ const SubtitleOverlay = ({ subtitle, containerWidth, containerHeight, fontScale 
   const centerX = (st.xPct ?? 0.5) * containerWidth;
   const centerY = (st.yPct ?? 0.9) * containerHeight;
 
-  const lines = theme.wordSplit
+  // Ali Abdaal: word-by-word data
+  const aliWords = isAliAbdaal
+    ? (Array.isArray(subtitle?.words) && subtitle.words.length
+        ? subtitle.words
+        : fallbackWords(subtitle))
+    : [];
+  const activeWordIdx = isAliAbdaal ? getActiveWordIndex(aliWords, currentTime) : -1;
+
+  // Other themes: line split
+  const lines = !isAliAbdaal && theme.wordSplit
     ? splitToWordChunks(displayText, theme.wordsPerLine ?? 2)
     : [displayText];
 
-  /* ── Pointer drag ─────────────────────────────────────────── */
+  /* ── Pointer drag ──────────────────────────────── */
   const onPointerDown = (e) => {
     e.stopPropagation();
     e.preventDefault();
-
     const node = dragRef.current;
     const parent = node?.parentElement;
     if (!node || !parent) return;
-
     const rect = node.getBoundingClientRect();
     const parentRect = parent.getBoundingClientRect();
     dragRef.current?.setPointerCapture(e.pointerId);
-
     pointerStart.current = {
       clientX: e.clientX,
       clientY: e.clientY,
@@ -82,14 +119,12 @@ const SubtitleOverlay = ({ subtitle, containerWidth, containerHeight, fontScale 
     if (!pointerStart.current) return;
     const dx = e.clientX - pointerStart.current.clientX;
     const dy = e.clientY - pointerStart.current.clientY;
-
     const nextCenterX = pointerStart.current.centerX + dx;
     const nextCenterY = pointerStart.current.centerY + dy;
     const minCenterX = safeInsetX + pointerStart.current.boxWidth / 2;
     const maxCenterX = containerWidth - safeInsetX - pointerStart.current.boxWidth / 2;
     const minCenterY = safeInsetY + pointerStart.current.boxHeight / 2;
     const maxCenterY = containerHeight - safeInsetY - pointerStart.current.boxHeight / 2;
-
     onUpdateStyle(subtitle.id, {
       position: 'custom',
       xPct: clamp(nextCenterX, minCenterX, maxCenterX) / containerWidth,
@@ -97,52 +132,59 @@ const SubtitleOverlay = ({ subtitle, containerWidth, containerHeight, fontScale 
     });
   };
 
-  const onPointerUp = () => {
-    pointerStart.current = null;
-  };
+  const onPointerUp = () => { pointerStart.current = null; };
 
-  /* ── Line rendering ───────────────────────────────────────── */
-  const lineStyle = {
+  /* ── Ali Abdaal box wrapper ────────────────────── */
+  const boxRadius = Math.round((theme.backgroundRadius ?? 8) * fontScale);
+  const boxPadV   = Math.round(14 * fontScale);
+  const boxPadH   = Math.round(24 * fontScale);
+
+  /* ── Shared line/word style ────────────────────── */
+  const baseLineStyle = {
     fontFamily,
     fontSize: `${fontSize}px`,
     fontWeight: theme.fontWeight || '700',
-    color: textColor,
-    WebkitTextStroke: `${strokeWidth}px ${strokeColor}`,
-    paintOrder: 'stroke fill',
     textTransform: theme.textTransform || 'none',
     textAlign: 'center',
     letterSpacing: theme.letterSpacing || '0px',
-    lineHeight: 1.25,
+    lineHeight: 1.3,
     display: 'block',
     userSelect: 'none',
     whiteSpace: 'normal',
     overflowWrap: 'break-word',
     wordBreak: 'break-word',
     maxWidth: '100%',
+  };
+
+  // Standard (non-ali) line style
+  const lineStyle = {
+    ...baseLineStyle,
+    color: textColor,
+    WebkitTextStroke: strokeWidth > 0 ? `${strokeWidth}px ${strokeColor}` : 'none',
+    paintOrder: 'stroke fill',
     textShadow: theme.background
-      ? '0 2px 10px rgba(0,0,0,0.45)'
+      ? 'none'
       : [
           '0 0 6px rgba(0,0,0,0.98)',
           '0 0 18px rgba(0,0,0,0.9)',
           '0 4px 14px rgba(0,0,0,0.75)',
         ].join(', '),
-    ...(theme.background
+    ...(theme.background && !isAliAbdaal
       ? {
           background: theme.background,
           padding: `${Math.round(5 * fontScale)}px ${Math.round(12 * fontScale)}px`,
           borderRadius: `${Math.round(8 * fontScale)}px`,
           boxShadow: '0 8px 24px rgba(0,0,0,0.35)',
-          WebkitTextStroke: `${strokeWidth}px ${strokeColor}`,
-          textShadow: '0 1px 0 rgba(0,0,0,0.2)',
         }
       : {}),
   };
 
+  /* ── Wrapper positioning ───────────────────────── */
   const wrapperStyle = {
     position: 'absolute',
     left: position === 'custom' ? centerX : containerWidth / 2,
-    maxWidth: `${overlayWidth}px`,
-    width: 'max-content',
+    maxWidth: isAliAbdaal ? `${overlayWidth}px` : `${overlayWidth}px`,
+    width: isAliAbdaal ? 'auto' : 'max-content',
     textAlign: 'center',
     cursor: 'grab',
     pointerEvents: 'auto',
@@ -169,6 +211,62 @@ const SubtitleOverlay = ({ subtitle, containerWidth, containerHeight, fontScale 
     wrapperStyle.transform = 'translateX(-50%)';
   }
 
+  /* ── Ali Abdaal render ─────────────────────────── */
+  if (isAliAbdaal) {
+    const activeColor    = theme.activeColor    || '#111111';
+    const secondaryColor = theme.secondaryColor || '#9CA3AF';
+
+    return (
+      <div
+        ref={dragRef}
+        style={wrapperStyle}
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={onPointerUp}
+        onPointerCancel={onPointerUp}
+      >
+        {/* White rounded box */}
+        <div
+          style={{
+            background: '#FFFFFF',
+            borderRadius: `${boxRadius}px`,
+            padding: `${boxPadV}px ${boxPadH}px`,
+            boxShadow: '0 4px 24px rgba(0,0,0,0.18)',
+            display: 'inline-block',
+            maxWidth: '100%',
+          }}
+        >
+          <span
+            style={{
+              ...baseLineStyle,
+              WebkitTextStroke: 'none',
+              textShadow: 'none',
+            }}
+          >
+            {aliWords.map((w, i) => {
+              const word = String(w?.word ?? w?.text ?? '').trim();
+              // spoken (past + current) = dark; future = gray
+              const isSpoken = activeWordIdx === -1 ? false : i <= activeWordIdx;
+              return (
+                <span
+                  key={i}
+                  style={{
+                    color: isSpoken ? activeColor : secondaryColor,
+                    fontWeight: isSpoken ? '700' : '400',
+                    transition: 'color 0.06s ease, font-weight 0.06s ease',
+                  }}
+                >
+                  {word}{i < aliWords.length - 1 ? ' ' : ''}
+                </span>
+              );
+            })}
+          </span>
+        </div>
+      </div>
+    );
+  }
+
+  /* ── Standard render ───────────────────────────── */
   return (
     <div
       ref={dragRef}
