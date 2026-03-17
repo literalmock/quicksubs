@@ -212,12 +212,12 @@ const CaptionPropertiesPanel = ({
               className="w-full accent-primary-500"
             />
           </Field>
-          <Field label={`Vertical (${Math.round((st.yPct ?? 0.85) * 100)}%)`}>
+          <Field label={`Vertical (${Math.round((st.yPct ?? 0.9) * 100)}%)`}>
             <input
               type="range"
               min="0"
               max="100"
-              value={Math.round((st.yPct ?? 0.85) * 100)}
+              value={Math.round((st.yPct ?? 0.9) * 100)}
               onChange={(e) => onUpdateStyle(subtitle.id, { yPct: Number(e.target.value) / 100 })}
               className="w-full accent-primary-500"
             />
@@ -227,8 +227,7 @@ const CaptionPropertiesPanel = ({
 
       {/* Hint */}
       <p className="text-[10px] text-surface-600 leading-relaxed">
-        Drag the caption on the video canvas to freely reposition, or use the side handles to
-        resize text.
+        Drag the caption inside the video frame to reposition it while staying within the safe area.
       </p>
     </div>
   );

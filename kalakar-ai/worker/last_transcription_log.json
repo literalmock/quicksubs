@@ -1,314 +1,38 @@
 {
   "videoId": "69b897aa0209a4186b84e37f",
-  "provider": "groq",
+  "provider": "elevenlabs",
   "language": "hinglish",
-  "timestamp": "2026-03-16T23:54:07.635Z",
+  "timestamp": "2026-03-17T06:01:21.043Z",
   "quality": {
     "approved": true,
-    "overallScore": 0.885,
-    "avgCaptionConfidence": 0.891,
+    "overallScore": 0.893,
+    "avgCaptionConfidence": 0.893,
     "lowConfidenceCaptions": 1,
-    "suspiciousTokenCount": 2,
+    "suspiciousTokenCount": 0,
     "hasDevanagari": false,
     "hasNonAscii": false,
     "manualReviewCount": 0,
-    "primaryProvider": "groq",
-    "secondaryProvider": "elevenlabs",
+    "primaryProvider": "elevenlabs",
+    "secondaryProvider": null,
     "verifierProvider": "deepseek",
     "verifierModel": "deepseek-chat",
     "issues": [
-      "Primary has 'azaar' which seems like ASR error for 'agar' (confirmed by secondary).",
-      "Primary has 'bhaar' which seems like ASR error for 'bahar' (confirmed by secondary).",
-      "Primary has 'hue' vs secondary 'hote hain' for 'hurt hoti hai' - kept closer to primary but adjusted tense.",
-      "Primary has 'tarf' vs secondary 'taraf' - normalized to 'taraf'.",
-      "Primary has 'gaya' vs secondary 'gaye' - adjusted for plural 'investors'.",
-      "Primary has 'kuki' vs secondary 'kyunki' - normalized to 'kyunki'.",
-      "Primary caption 'Maintain all code-switching, names, and numbers.' appears to be an instruction, not spoken content. Replaced with secondary caption content.",
-      "Primary caption 'And the insecurity that to happens the investor at any point...' is grammatically incorrect. Used secondary caption for clarity.",
-      "Secondary caption starts with 'तो hurt होते ही होते हैं।' which is not aligned with primary timing. Ignored as it falls outside primary segment start.",
-      "Confidence lowered for segments where primary and secondary transcripts diverge significantly in wording.",
-      "Primary transcript has grammatical errors and repetition ('and outside' should be 'outside', repeated lines).",
-      "Secondary transcript shows Hindi filler words and different phrasing ('कम Absolutely' appears in secondary but not primary).",
-      "Primary has duplicate location list; secondary suggests speaker is giving examples within the country.",
-      "Confidence lowered for first caption due to grammatical correction from 'to happens' to 'happens to'.",
-      "Primary caption 'he doesn't in have the money his pocket' is unclear. Secondary suggests 'paisa uska pocket na ho' (money not in his pocket). Used secondary with Romanization.",
-      "Primary 'Reinvesting ka matlabhi' likely misheard for 'Real estate ka matlab hi' based on secondary. Corrected.",
-      "Primary 'Belkul' corrected to standard Roman 'Bilkul'.",
-      "Primary 'lalaj' likely misheard for 'lalach' (greed). Corrected.",
-      "Timing alignment between primary and secondary captions is slightly off, requiring careful cross-check.",
-      "Primary transcript has 'upah' which seems like ASR error for 'upar' (supported by secondary 'ऊपर')",
-      "Primary has 'wone' which seems like ASR error for 'unhe' (supported by secondary 'उन्हें')",
-      "Primary has 'ki hai' but secondary suggests 'hai' only; adjusted to 'hai' for natural flow",
-      "Primary has 'hum se' but secondary has 'हमसे' so 'humse' is more accurate",
-      "Primary has 'yaa' but 'ya' or 'ya fir' is standard Roman Hinglish"
+      "No secondary transcript for cross-checking.",
+      "Some Hindi phrases may need verification for exact wording (e.g., 'mere ko to bilkul lagta hai' vs 'mujhe to bilkul lagta hai').",
+      "Potential minor grammatical adjustments in Hindi parts.",
+      "Possible context needed for 'Bank ho jaaye' - could be 'bank ho jaaye' (become a bank) or 'bail ho jaaye' (get bail). Kept as 'Bank' based on primary evidence.",
+      "Some phrases like 'paise three times, four times na hon' may need context for precise meaning.",
+      "Fragment 'Kam Absolutely.' appears to be a mishearing or incomplete phrase. Could be 'Kam absolutely' (less absolutely) or a cut-off word.",
+      "Initial 'Par- aa hi yeh maan ke' might be 'Par aahi yeh maan ke' or similar - unclear from context.",
+      "Uncertain translation of 'पोल' (pol) - could be 'pool' or 'pole' or misheard word",
+      "Mixed Hindi-English phrasing may need verification for naturalness",
+      "No secondary transcript for cross-checking"
     ]
   },
   "raw": {
-    "primaryProvider": "groq",
-    "primaryText": "Ayush, so what do you think, jo big cap investors the Delhi se Dubai shift ho gaya the for their investments, after this war and ongoing situation, do you think ki wapis Delhi NCR ki tarf investment ke baare mein soch sakte? Mereko toh bilkul lagta hai. Kuki aaj azaar hum ye cheez dekhe ki jiska paisa bhaar jaa raha hai India se, Dubai agar koi banda paisa apna invest kar raha hai, aur jo abhi Dubai ke andar hua, usse har kisi ke sentiments toh hurt hoti hai. Very true, very true. And the current situation that we know and the news that we hear that people are not coming and the turmoil that is there at this time, the situation is very bad. And if the investor does not have his money three times, four times, which he was doing in Dubai, then his money will be saved. Maintain all code-switching, names, and numbers. And the insecurity that happens to the investor at any point... And the insecurity that happens to the investor at any point... If you invest your money outside, and you can't go outside, how will you bring your money? If you invest your money outside, and you can't go outside, how will you bring your money? At least if the money is in your country, Greater Noida, Noida, Yamuna, Gurgaon, Greater Noida,Noida,Yamuna,Gurgaon, he can see that he has the money, he can go there anytime by car, he can do things for himself. Multiple times he doesn't have the money in his pocket. But we can say that, yes, investment is safe. Reinvesting ka matlabhi investment safe karne hi thaat? Belkul. Ke paise ek ke do ho jaye, teen ho jaye, chaar ho jaye. Agar lalaj kisi ka bada hai, usse toh kabhi kuch mila hi nahi hai. Logo ke upah depend karta hai, ki wone paise apna bahar invest karna, yaa fir wo India aate hain aur hum se baat kare hain.",
+    "primaryProvider": "elevenlabs",
+    "primaryText": "Ayush, so what do you think जो big cap investors थे, जो Delhi से Dubai shift हो गए थे for their investments. After this war and ongoing situation, do you think कि वो वापस Delhi NCR की तरफ investment के बारे में सोच सकते हैं? मेरे को तो बिल्कुल लगता है। क्योंकि आज अगर हम यह चीज देखें कि जिसका पैसा बाहर जा रहा है India से, Dubai अगर कोई बंदा पैसा अपना invest कर रहा है और जो भी Dubai के अंदर हुआ, तो उससे हर किसी के sentiments तो hurt होते ही होते हैं। Very true, very true. और इस समय जो situations हमें भी पता है और जो news हम भी सुनते हैं कि लोग आ नहीं पा रहे और जो turmoil वहां पर इस समय है, situation है बहुत खराब। और investor को अपने पैसे three times, four times ना हों, जो वो Dubai जाकर कर रहे थे, उनका पैसा बच जाए वो भी बहुत बड़ी बात है। Bank हो जाए, सही बात है। और insecurity जो investor को हो जाती है वो किसी भी point पर- आ ही यह मान के चलो कि अपना पैसा आपने बाहर invest कर दिया, आप बाहर ही नहीं जा पा रहे तो अपना पैसा लेकर कैसे आओगे? Absolutely. कम से कम अपनी country के अंदर अगर पैसा लगा हुआ है उसका, चाहे Greater Noida, Noida, Yamuna, Gurgaon हो, उसका पैसा उसे दिख तो रहा है ना कि उसके पास है। वो कभी भी जाकर अपनी गाड़ी से जा तो सकता है ना कभी भी वहां पर और चीजें कर भी सकता है वो अपने लिए। Multiple times पैसा उसका पोल ना हो। But हम यह जरूर कह सकते हैं कि हां investment safe है। Real estate का मतलब ही investment safe करने का ही था। बिल्कुल। कि पैसा एक के दो हो जाए, तीन हो जाए, चार हो जाए वो अगर लालच किसी का बढ़ा है, उसे तो फिर कभी कुछ मिला ही नहीं है। लोगों के ऊपर depend करता है कि उन्हें पैसा अपना बाहर invest करना है या फिर वो India आते हैं और हमसे बात करें।",
     "primaryCaptions": [
-      {
-        "start": 0,
-        "end": 2.6,
-        "text": "Ayush, so what do you think, jo big cap investors the",
-        "lines": 2
-      },
-      {
-        "start": 2.6,
-        "end": 5.2,
-        "text": "Delhi se Dubai shift ho gaya the for their investments,",
-        "lines": 2
-      },
-      {
-        "start": 5.2,
-        "end": 7.800000000000001,
-        "text": "after this war and ongoing situation, do you think ki",
-        "lines": 2
-      },
-      {
-        "start": 7.800000000000001,
-        "end": 10.4,
-        "text": "wapis Delhi NCR ki tarf ke investment baare mein soch",
-        "lines": 2
-      },
-      {
-        "start": 10.4,
-        "end": 13,
-        "text": "sakte?",
-        "lines": 1
-      },
-      {
-        "start": 13,
-        "end": 15.5,
-        "text": "Mereko toh bilkul lagta hai.",
-        "lines": 1
-      },
-      {
-        "start": 15.5,
-        "end": 18.375,
-        "text": "Kuki aaj azaar hum ye cheez dekhe ki jiska paisa bhaar",
-        "lines": 2
-      },
-      {
-        "start": 18.375,
-        "end": 21.25,
-        "text": "jaa raha hai India se, Dubai agar koi banda paisa apna",
-        "lines": 2
-      },
-      {
-        "start": 21.25,
-        "end": 24.125,
-        "text": "invest kar raha hai, aur jo abhi Dubai ke andar hua,",
-        "lines": 2
-      },
-      {
-        "start": 24.125,
-        "end": 27,
-        "text": "usse har kisi ke sentiments toh hurt hoti hai.",
-        "lines": 2
-      },
-      {
-        "start": 27,
-        "end": 28,
-        "text": "Very true, very true.",
-        "lines": 1
-      },
-      {
-        "start": 28,
-        "end": 31.2,
-        "text": "And the current situation we that know and the news that",
-        "lines": 2
-      },
-      {
-        "start": 31.2,
-        "end": 34.4,
-        "text": "we hear that people are not coming and the turmoil that",
-        "lines": 2
-      },
-      {
-        "start": 34.4,
-        "end": 37.6,
-        "text": "is there at this time, the situation is very bad.",
-        "lines": 2
-      },
-      {
-        "start": 37.6,
-        "end": 40.086666666666666,
-        "text": "And if the investor does not have his money three times,",
-        "lines": 2
-      },
-      {
-        "start": 40.086666666666666,
-        "end": 42.57333333333333,
-        "text": "four times, which he was in doing Dubai, then his money",
-        "lines": 2
-      },
-      {
-        "start": 42.57333333333333,
-        "end": 45.06,
-        "text": "will be saved.",
-        "lines": 1
-      },
-      {
-        "start": 45,
-        "end": 47,
-        "text": "Maintain all code-switching, names, and numbers.",
-        "lines": 2
-      },
-      {
-        "start": 47,
-        "end": 48,
-        "text": "And the insecurity that to happens the investor at any",
-        "lines": 2
-      },
-      {
-        "start": 48,
-        "end": 49,
-        "text": "point...",
-        "lines": 1
-      },
-      {
-        "start": 49,
-        "end": 50,
-        "text": "And the insecurity that to happens the investor at any",
-        "lines": 2
-      },
-      {
-        "start": 50,
-        "end": 51,
-        "text": "point...",
-        "lines": 1
-      },
-      {
-        "start": 51,
-        "end": 52,
-        "text": "If you invest your money and outside, you can't go",
-        "lines": 2
-      },
-      {
-        "start": 52,
-        "end": 53,
-        "text": "outside, how will you bring your money?",
-        "lines": 2
-      },
-      {
-        "start": 53,
-        "end": 54,
-        "text": "If you invest your money and outside, you can't go",
-        "lines": 2
-      },
-      {
-        "start": 54,
-        "end": 55,
-        "text": "outside, how will you bring your money?",
-        "lines": 2
-      },
-      {
-        "start": 55,
-        "end": 57,
-        "text": "At least if the money is in your country,",
-        "lines": 2
-      },
-      {
-        "start": 57,
-        "end": 59,
-        "text": "Greater Noida, Noida, Yamuna, Gurgaon,",
-        "lines": 2
-      },
-      {
-        "start": 59,
-        "end": 61,
-        "text": "Greater Noida,Noida,Yamuna,Gurgaon,",
-        "lines": 2
-      },
-      {
-        "start": 61,
-        "end": 63,
-        "text": "he can see that he has the money,",
-        "lines": 2
-      },
-      {
-        "start": 63,
-        "end": 65,
-        "text": "he can go there anytime by car,",
-        "lines": 2
-      },
-      {
-        "start": 65,
-        "end": 67,
-        "text": "he can do things for himself.",
-        "lines": 2
-      },
-      {
-        "start": 67,
-        "end": 69,
-        "text": "Multiple times he doesn't in have the money his pocket.",
-        "lines": 2
-      },
-      {
-        "start": 69,
-        "end": 71,
-        "text": "But we can say that, yes,",
-        "lines": 1
-      },
-      {
-        "start": 71,
-        "end": 73,
-        "text": "investment is safe.",
-        "lines": 1
-      },
-      {
-        "start": 73,
-        "end": 75.32,
-        "text": "Reinvesting ka matlabhi safe investment karne hi thaat?",
-        "lines": 2
-      },
-      {
-        "start": 75.32,
-        "end": 75.82,
-        "text": "Belkul.",
-        "lines": 1
-      },
-      {
-        "start": 75.82,
-        "end": 79,
-        "text": "Ke paise ek ke do ho jaye, teen ho jaye, chaar ho jaye.",
-        "lines": 2
-      },
-      {
-        "start": 79,
-        "end": 80.88,
-        "text": "Agar lalaj kisi ka bada hai, usse toh kabhi kuch mila hi",
-        "lines": 2
-      },
-      {
-        "start": 80.88,
-        "end": 82.75999999999999,
-        "text": "nahi hai.",
-        "lines": 1
-      },
-      {
-        "start": 82.75999999999999,
-        "end": 84.36,
-        "text": "Logo ke upah depend karta ki hai, wone paise apna bahar",
-        "lines": 2
-      },
-      {
-        "start": 84.36,
-        "end": 85.96000000000001,
-        "text": "invest karna,",
-        "lines": 1
-      },
-      {
-        "start": 85.96000000000001,
-        "end": 87.96000000000001,
-        "text": "yaa fir wo India aate hain aur hum se baat kare hain.",
-        "lines": 2
-      }
-    ],
-    "secondaryProvider": "elevenlabs",
-    "secondaryText": "Ayush, so what do you think जो big cap investors थे, जो Delhi से Dubai shift हो गए थे for their investments. After this war and ongoing situation, do you think कि वो वापस Delhi NCR की तरफ investment के बारे में सोच सकते हैं? मेरे को तो बिल्कुल लगता है। क्योंकि आज अगर हम यह चीज देखें कि जिसका पैसा बाहर जा रहा है India से, Dubai अगर कोई बंदा पैसा अपना invest कर रहा है और जो भी Dubai के अंदर हुआ, तो उससे हर किसी के sentiments तो hurt होते ही होते हैं। Very true, very true. और इस समय जो situations हमें भी पता है और जो news हम भी सुनते हैं कि लोग आ नहीं पा रहे और जो turmoil वहां पर इस समय है, situation है बहुत खराब। और investor को अपने पैसे three times, four times ना हों, जो वो Dubai जाकर कर रहे थे, उनका पैसा बच जाए वो भी बहुत बड़ी बात है। Bank हो जाए, सही बात है। और insecurity जो investor को हो जाती है वो किसी भी point पर- आ ही यह मान के चलो कि अपना पैसा आपने बाहर invest कर दिया, आप बाहर ही नहीं जा पा रहे तो अपना पैसा लेकर कैसे आओगे? Absolutely. कम से कम अपनी country के अंदर अगर पैसा लगा हुआ है उसका, चाहे Greater Noida, Noida, Yamuna, Gurgaon हो, उसका पैसा उसे दिख तो रहा है ना कि उसके पास है। वो कभी भी जाकर अपनी गाड़ी से जा तो सकता है ना कभी भी वहां पर और चीजें कर भी सकता है वो अपने लिए। Multiple times पैसा उसका पोल ना हो। But हम यह जरूर कह सकते हैं कि हां investment safe है। Real estate का मतलब ही investment safe करने का ही था। बिल्कुल। कि पैसा एक के दो हो जाए, तीन हो जाए, चार हो जाए वो अगर लालच किसी का बढ़ा है, उसे तो फिर कभी कुछ मिला ही नहीं है। लोगों के ऊपर depend करता है कि उन्हें पैसा अपना बाहर invest करना है या फिर वो India आते हैं और हमसे बात करें।",
-    "secondaryCaptions": [
       {
         "start": 0.28,
         "end": 1.259,
@@ -664,35 +388,24 @@
         "lines": 1
       }
     ],
+    "secondaryProvider": null,
+    "secondaryText": null,
+    "secondaryCaptions": [],
     "verifier": {
       "provider": "deepseek",
       "model": "deepseek-chat",
-      "avgConfidence": 0.891,
+      "avgConfidence": 0.893,
       "issues": [
-        "Primary has 'azaar' which seems like ASR error for 'agar' (confirmed by secondary).",
-        "Primary has 'bhaar' which seems like ASR error for 'bahar' (confirmed by secondary).",
-        "Primary has 'hue' vs secondary 'hote hain' for 'hurt hoti hai' - kept closer to primary but adjusted tense.",
-        "Primary has 'tarf' vs secondary 'taraf' - normalized to 'taraf'.",
-        "Primary has 'gaya' vs secondary 'gaye' - adjusted for plural 'investors'.",
-        "Primary has 'kuki' vs secondary 'kyunki' - normalized to 'kyunki'.",
-        "Primary caption 'Maintain all code-switching, names, and numbers.' appears to be an instruction, not spoken content. Replaced with secondary caption content.",
-        "Primary caption 'And the insecurity that to happens the investor at any point...' is grammatically incorrect. Used secondary caption for clarity.",
-        "Secondary caption starts with 'तो hurt होते ही होते हैं।' which is not aligned with primary timing. Ignored as it falls outside primary segment start.",
-        "Confidence lowered for segments where primary and secondary transcripts diverge significantly in wording.",
-        "Primary transcript has grammatical errors and repetition ('and outside' should be 'outside', repeated lines).",
-        "Secondary transcript shows Hindi filler words and different phrasing ('कम Absolutely' appears in secondary but not primary).",
-        "Primary has duplicate location list; secondary suggests speaker is giving examples within the country.",
-        "Confidence lowered for first caption due to grammatical correction from 'to happens' to 'happens to'.",
-        "Primary caption 'he doesn't in have the money his pocket' is unclear. Secondary suggests 'paisa uska pocket na ho' (money not in his pocket). Used secondary with Romanization.",
-        "Primary 'Reinvesting ka matlabhi' likely misheard for 'Real estate ka matlab hi' based on secondary. Corrected.",
-        "Primary 'Belkul' corrected to standard Roman 'Bilkul'.",
-        "Primary 'lalaj' likely misheard for 'lalach' (greed). Corrected.",
-        "Timing alignment between primary and secondary captions is slightly off, requiring careful cross-check.",
-        "Primary transcript has 'upah' which seems like ASR error for 'upar' (supported by secondary 'ऊपर')",
-        "Primary has 'wone' which seems like ASR error for 'unhe' (supported by secondary 'उन्हें')",
-        "Primary has 'ki hai' but secondary suggests 'hai' only; adjusted to 'hai' for natural flow",
-        "Primary has 'hum se' but secondary has 'हमसे' so 'humse' is more accurate",
-        "Primary has 'yaa' but 'ya' or 'ya fir' is standard Roman Hinglish"
+        "No secondary transcript for cross-checking.",
+        "Some Hindi phrases may need verification for exact wording (e.g., 'mere ko to bilkul lagta hai' vs 'mujhe to bilkul lagta hai').",
+        "Potential minor grammatical adjustments in Hindi parts.",
+        "Possible context needed for 'Bank ho jaaye' - could be 'bank ho jaaye' (become a bank) or 'bail ho jaaye' (get bail). Kept as 'Bank' based on primary evidence.",
+        "Some phrases like 'paise three times, four times na hon' may need context for precise meaning.",
+        "Fragment 'Kam Absolutely.' appears to be a mishearing or incomplete phrase. Could be 'Kam absolutely' (less absolutely) or a cut-off word.",
+        "Initial 'Par- aa hi yeh maan ke' might be 'Par aahi yeh maan ke' or similar - unclear from context.",
+        "Uncertain translation of 'पोल' (pol) - could be 'pool' or 'pole' or misheard word",
+        "Mixed Hindi-English phrasing may need verification for naturalness",
+        "No secondary transcript for cross-checking"
       ]
     },
     "secondaryError": null

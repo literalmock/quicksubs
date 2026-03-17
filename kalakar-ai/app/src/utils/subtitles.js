@@ -8,13 +8,13 @@ export const DEFAULT_STYLE = {
   align: 'center',
   position: 'bottom', // top | middle | bottom | custom
   xPct: 0.5,
-  yPct: 0.85,
+  yPct: 0.9,
   theme: 'classic',
 };
 
-const POSITION_Y = { top: 0.08, middle: 0.45, bottom: 0.88 };
+const POSITION_Y = { top: 0.1, middle: 0.5, bottom: 0.9 };
 
-export const positionToYPct = (position) => POSITION_Y[position] ?? 0.88;
+export const positionToYPct = (position) => POSITION_Y[position] ?? 0.9;
 
 const toNumber = (value, fallback = 0) => {
   const num = Number(value);
@@ -40,7 +40,7 @@ export const normalizeToLatin = (value) => {
     .replace(/\r?\n+/g, ' ')
     .replace(/[“”]/g, '"')
     .replace(/[‘’]/g, "'")
-    .replace(/[\/|]+/g, ' ')
+    .replace(/[/|]+/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
   return text;
@@ -125,6 +125,13 @@ const extractFirstFont = (cssFontFamily) => {
   return match ? match[1].trim() : 'Arial';
 };
 
+const positionToAssAlignment = (position) => {
+  if (position === 'top') return 8;
+  if (position === 'middle') return 5;
+  if (position === 'custom') return 5;
+  return 2;
+};
+
 const toAssTime = (seconds) => {
   const s = Math.max(0, seconds);
   const h = Math.floor(s / 3600);
@@ -205,10 +212,10 @@ export const subtitlesToAss = (subtitles, vw = 1920, vh = 1080) => {
       
       // Calculate exact center position based on percentages
       const posX = Math.round((st.xPct !== undefined ? st.xPct : 0.5) * vw);
-      const posY = Math.round((st.yPct !== undefined ? st.yPct : 0.85) * vh);
-      
-      // We always force middle-center alignment (\an5) to perfectly match HTML overlay's translate(-50%, -50%).
-      const overrides = [`\\an5`, `\\pos(${posX},${posY})`];
+      const posY = Math.round((st.yPct !== undefined ? st.yPct : 0.9) * vh);
+      const alignment = positionToAssAlignment(st.position);
+
+      const overrides = [`\\an${alignment}`, `\\pos(${posX},${posY})`];
 
       const repSt = subtitles.find((s2) => (s2.style?.theme || 'classic') === themeKey)?.style || {};
       if (st.fontSize && st.fontSize !== (repSt.fontSize ?? theme.fontSize)) overrides.push(`\\fs${st.fontSize}`);
