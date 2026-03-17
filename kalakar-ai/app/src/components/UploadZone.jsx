@@ -21,6 +21,15 @@ const MAX_FILE_SIZE = 250 * 1024 * 1024; // 250 MB
 const CLOUDINARY_DIRECT_LIMIT = 100 * 1024 * 1024; // 100 MB account cap on current plan
 const CHUNK_SIZE = 20 * 1024 * 1024; // 20 MB chunks
 
+const formatFileSize = (size) => {
+  if (!size) return '0 MB';
+  const mb = size / (1024 * 1024);
+  return mb >= 1024 ? `${(mb / 1024).toFixed(2)} GB` : `${mb.toFixed(1)} MB`;
+};
+
+const getLanguageLabel = (value) =>
+  LANGUAGE_OPTIONS.find((option) => option.value === value)?.label || 'Hinglish';
+
 /**
  * Upload a single chunk to Cloudinary with Content-Range header.
  * Returns parsed JSON response (final chunk returns full upload result).
@@ -61,6 +70,7 @@ const UploadZone = ({ onUploadComplete }) => {
   const [language, setLanguage] = useState('hinglish');
   const [pendingFile, setPendingFile] = useState(null);
   const [showLanguagePopup, setShowLanguagePopup] = useState(false);
+  const [activeUpload, setActiveUpload] = useState(null);
 
   const closeLanguagePopup = () => {
     if (uploading) return;
@@ -76,6 +86,11 @@ const UploadZone = ({ onUploadComplete }) => {
       return;
     }
 
+    setActiveUpload({
+      name: file.name,
+      size: file.size,
+      language: selectedLanguage,
+    });
     setUploading(true);
     setProgress(0);
     setPhase('uploading');
@@ -98,6 +113,7 @@ const UploadZone = ({ onUploadComplete }) => {
         });
 
         setPhase('registering');
+        setProgress(100);
         onUploadComplete?.(data.video);
         return;
       }
@@ -161,6 +177,7 @@ const UploadZone = ({ onUploadComplete }) => {
       }
 
       setPhase('registering');
+      setProgress(100);
       const { data } = await api.post('/video/register', {
         cloudinaryUrl: cloudData.secure_url,
         cloudinaryPublicId: cloudData.public_id,
@@ -176,6 +193,7 @@ const UploadZone = ({ onUploadComplete }) => {
       setPhase('');
       setPendingFile(null);
       setShowLanguagePopup(false);
+      setActiveUpload(null);
     }
   }, [onUploadComplete]);
 
@@ -190,7 +208,10 @@ const UploadZone = ({ onUploadComplete }) => {
 
   const confirmLanguageAndUpload = async () => {
     if (!pendingFile || uploading) return;
-    await startUpload(pendingFile, language);
+    const file = pendingFile;
+    const selectedLanguage = language;
+    setShowLanguagePopup(false);
+    await startUpload(file, selectedLanguage);
   };
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -216,15 +237,23 @@ const UploadZone = ({ onUploadComplete }) => {
         <input {...getInputProps()} />
 
         {uploading ? (
-          <div className="space-y-4">
+          <div className="space-y-5">
             <div className="w-16 h-16 mx-auto rounded-full bg-primary-600/20 flex items-center justify-center">
               <div className="w-10 h-10 border-4 border-primary-500 border-t-transparent rounded-full animate-spin" />
             </div>
-            <div>
+            <div className="space-y-2">
               <p className="text-sm font-medium">
-                {phase === 'registering' ? 'Starting transcription...' : 'Uploading...'}
+                {phase === 'registering' ? 'Upload complete. Starting transcription...' : 'Uploading your video...'}
               </p>
-              <p className="text-xs text-surface-500 mt-1">{progress}% complete</p>
+              {activeUpload && (
+                <div className="space-y-1">
+                  <p className="text-sm text-surface-300 break-all">{activeUpload.name}</p>
+                  <p className="text-xs text-surface-500">
+                    {formatFileSize(activeUpload.size)} • {getLanguageLabel(activeUpload.language)}
+                  </p>
+                </div>
+              )}
+              <p className="text-xs text-surface-500">{progress}% complete</p>
             </div>
             <div className="w-64 mx-auto bg-surface-700 rounded-full h-2 overflow-hidden">
               <div
@@ -232,6 +261,9 @@ const UploadZone = ({ onUploadComplete }) => {
                 style={{ width: `${progress}%` }}
               />
             </div>
+            <p className="text-xs text-surface-500">
+              Keep this page open while we finish the upload and queue transcription.
+            </p>
           </div>
         ) : (
           <div className="space-y-4">
