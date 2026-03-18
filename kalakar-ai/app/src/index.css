@@ -123,3 +123,23 @@
   50%  { transform: scale(1.04); }
   to   { transform: scale(1); }
 }
+
+/* Ali Abdaal single-line enforcement */
+.caption-renderer--ali-abdaal {
+  white-space: nowrap !important;
+  overflow: visible !important;
+  display: inline-block !important;
+  /* Removed max-width constraint to allow full text display */
+}
+
+.caption-renderer--ali-abdaal .caption-line {
+  white-space: nowrap !important;
+  overflow: visible !important;
+  display: inline-block !important;
+  /* Removed max-width constraint to allow full text display */
+}
+
+.caption-renderer--ali-abdaal .caption-word {
+  display: inline-block !important;
+  white-space: nowrap !important;
+}

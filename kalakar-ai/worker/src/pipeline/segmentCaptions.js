@@ -1,3 +1,5 @@
+import { splitLongChunks } from './captionFormatter.js';
+
 /**
  * Caption Segmentation Pipeline Step
  *
@@ -7,10 +9,10 @@
  * Also generates SRT content for subtitle burning.
  */
 
-const WORDS_PER_CAP = 4;
-const MAX_CAPTION_DURATION = 4;
+const WORDS_PER_CAP = 3;
+const MAX_CAPTION_DURATION = 2.5;
 const MIN_CAPTION_DURATION = 0.8;
-const WORD_PAUSE_THRESHOLD = 0.9;
+const WORD_PAUSE_THRESHOLD = 0.45;
 const SEGMENT_OVERLAP_EPSILON = 0.15;
 
 /**
@@ -90,6 +92,7 @@ const wordsToCaption = (words) => {
       start: group[0].start,
       end: group[group.length - 1].end,
       text: group.map((w) => w.word).join(' ').trim(),
+      words: [...group], // Include words array for frontend rendering
     });
     group = [];
   };
@@ -145,6 +148,18 @@ const segmentTextToChunks = (text) => {
   return chunks;
 };
 
+const buildSyntheticWords = (text, start, end) => {
+  const rawWords = String(text || '').trim().split(/\s+/).filter(Boolean);
+  const duration = end - start;
+  const avgWordDuration = duration / Math.max(rawWords.length, 1);
+  
+  return rawWords.map((word, index) => ({
+    word,
+    start: start + (index * avgWordDuration),
+    end: start + ((index + 1) * avgWordDuration),
+  }));
+};
+
 const buildSegmentCaptions = (segments, minStart = 0) => {
   const captions = [];
 
@@ -170,10 +185,13 @@ const buildSegmentCaptions = (segments, minStart = 0) => {
       const start = cursor;
       const end = Math.min(segEnd, start + safeDuration);
 
+      const syntheticWords = buildSyntheticWords(chunk.join(' '), start, end);
+      
       captions.push({
         start,
         end,
         text: chunk.join(' '),
+        words: syntheticWords, // Include synthetic words for frontend rendering
       });
 
       cursor = end + 0.05;
@@ -282,7 +300,8 @@ export const segmentCaptions = (transcriptionResult) => {
 
   // ── Pure segment mode (no word timestamps available) ─────────────────────
   if (!coverage.hasWords) {
-    const captions = mergeCaptions(segmentsToCaptions(segments));
+    const rawCaptions = mergeCaptions(segmentsToCaptions(segments));
+    const captions = splitLongChunks(rawCaptions); // Apply long chunk splitting
     console.log('📝 Segment-level captions (word timestamps not available)');
     return { captions, srt: captionsToSrt(captions) };
   }
@@ -306,7 +325,8 @@ export const segmentCaptions = (transcriptionResult) => {
     : [];
 
   const allCaptions = [...wordCaptions, ...gapFillCaptions, ...trailingCaptions];
-  const captions = mergeCaptions(allCaptions);
+  const mergedCaptions = mergeCaptions(allCaptions);
+  const captions = splitLongChunks(mergedCaptions); // Apply long chunk splitting
 
   if (internalGaps.length || trailingSegments.length) {
     console.log(

@@ -150,10 +150,10 @@ const SubtitleOverlay = ({
     lineHeight: 1.3,
     display: 'block',
     userSelect: 'none',
-    whiteSpace: 'normal',
-    overflowWrap: 'break-word',
-    wordBreak: 'break-word',
-    maxWidth: '100%',
+    whiteSpace: isAliAbdaal ? 'nowrap' : 'normal',
+    overflowWrap: isAliAbdaal ? 'normal' : 'break-word',
+    wordBreak: isAliAbdaal ? 'normal' : 'break-word',
+    maxWidth: isAliAbdaal ? 'none' : '100%',
   };
 
   // Standard (non-ali) line style
@@ -183,7 +183,7 @@ const SubtitleOverlay = ({
   const wrapperStyle = {
     position: 'absolute',
     left: position === 'custom' ? centerX : containerWidth / 2,
-    maxWidth: isAliAbdaal ? `${overlayWidth}px` : `${overlayWidth}px`,
+    maxWidth: isAliAbdaal ? 'none' : `${overlayWidth}px`,
     width: isAliAbdaal ? 'auto' : 'max-content',
     textAlign: 'center',
     cursor: 'grab',
@@ -193,7 +193,7 @@ const SubtitleOverlay = ({
     alignItems: 'center',
     gap: `${Math.max(4, Math.round(6 * fontScale))}px`,
     touchAction: 'none',
-    overflow: 'hidden',
+    overflow: 'visible',
     maxHeight: `${Math.min(maxOverlayHeight, containerHeight * 0.42)}px`,
   };
 
@@ -233,7 +233,8 @@ const SubtitleOverlay = ({
             padding: `${boxPadV}px ${boxPadH}px`,
             boxShadow: '0 4px 24px rgba(0,0,0,0.18)',
             display: 'inline-block',
-            maxWidth: '100%',
+            width: 'auto',
+            // Removed max-width constraint to allow full text display
           }}
         >
           <span

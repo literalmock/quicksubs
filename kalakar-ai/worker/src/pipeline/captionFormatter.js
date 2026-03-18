@@ -2,6 +2,7 @@ const MAX_CHARS_PER_LINE = 28;
 const MAX_LINES = 2;
 const MIN_DURATION = 1;
 const MAX_DURATION = 4;
+const MAX_WORDS_PER_SEGMENT = 5; // New: split segments with more than 5 words
 
 const normalizeText = (text) => String(text || '').replace(/\s+/g, ' ').trim();
 
@@ -90,7 +91,42 @@ const segmentToCaptions = (segment) => {
   return captions;
 };
 
+export const splitLongChunks = (captions) => {
+  const result = [];
+  
+  captions.forEach((caption) => {
+    // If caption has words array and exceeds max words, split it
+    if (caption.words && caption.words.length > MAX_WORDS_PER_SEGMENT) {
+      const words = caption.words;
+      const totalDuration = caption.end - caption.start;
+      const avgWordDuration = totalDuration / words.length;
+      
+      // Split into chunks of max MAX_WORDS_PER_SEGMENT
+      for (let i = 0; i < words.length; i += MAX_WORDS_PER_SEGMENT) {
+        const chunkWords = words.slice(i, i + MAX_WORDS_PER_SEGMENT);
+        const chunkStart = caption.start + (i * avgWordDuration);
+        const chunkEnd = Math.min(
+          caption.start + ((i + MAX_WORDS_PER_SEGMENT) * avgWordDuration),
+          caption.end
+        );
+        
+        result.push({
+          start: chunkStart,
+          end: chunkEnd,
+          text: chunkWords.map(w => w.word || w).join(' '),
+          words: chunkWords,
+        });
+      }
+    } else {
+      // Keep original caption if it's already short enough
+      result.push(caption);
+    }
+  });
+  
+  return result;
+};
+
 export const formatCaptionsFromSegments = (segments) => {
   const captions = (segments || []).flatMap(segmentToCaptions);
-  return captions.sort((a, b) => a.start - b.start);
+  return splitLongChunks(captions.sort((a, b) => a.start - b.start));
 };

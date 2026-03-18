@@ -4,6 +4,7 @@ import { buildWhisperParams, transcribeGroqChunk } from './groqTranscriber.js';
 import { splitAudioIntoChunks } from './audioChunker.js';
 import { processChunksWithRetry } from './transcriptionQueue.js';
 import { mergeChunkTranscriptions } from './captionMerger.js';
+import { segmentCaptions } from './segmentCaptions.js';
 import { formatCaptionsFromSegments } from './captionFormatter.js';
 import { transcribeWithElevenLabs } from './transcribeElevenLabs.js';
 
@@ -88,7 +89,14 @@ const runPass = async ({
     });
 
     const merged = mergeChunkTranscriptions(results);
-    const captions = formatCaptionsFromSegments(merged.segments);
+    // Use improved segmentation first, then apply quality formatting
+    const { captions: improvedCaptions } = segmentCaptions(merged);
+    const captions = formatCaptionsFromSegments(improvedCaptions.map(cap => ({
+      ...cap,
+      text: cap.text,
+      start: cap.start,
+      end: cap.end
+    })));
 
     return {
       merged,
@@ -168,8 +176,14 @@ export const transcribeAudio = async (audioPath, language = 'hinglish', provider
   // ── ElevenLabs bypass (doesn't need chunking) ──────────
   if (provider === 'elevenlabs') {
     const raw = await transcribeWithElevenLabs(audioPath, language);
-    // Generate captions from segments for downstream compatibility
-    const captions = formatCaptionsFromSegments(raw.segments);
+    // Use improved segmentation first, then apply quality formatting
+    const { captions: improvedCaptions } = segmentCaptions(raw);
+    const captions = formatCaptionsFromSegments(improvedCaptions.map(cap => ({
+      ...cap,
+      text: cap.text,
+      start: cap.start,
+      end: cap.end
+    })));
     return {
       ...raw,
       captions,

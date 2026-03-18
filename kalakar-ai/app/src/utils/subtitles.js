@@ -151,28 +151,32 @@ export const subtitlesToAss = (subtitles, vw = 1920, vh = 1080) => {
     const rep = subtitles.find((s) => (s.style?.theme || 'classic') === key);
     const rst = rep?.style || {};
     const fontName = extractFirstFont(rst.fontFamily || t.fontFamily);
-    const primaryColor = hexToAssBGR(rst.color ?? t.color);
+    const isAliAbdaal = key === 'aliAbdaal';
+    const primaryColor = hexToAssBGR(rst.color ?? (isAliAbdaal ? '#111111' : t.color));
     const fs = rst.fontSize ?? t.fontSize;
     const bold = t.fontWeight === '900' || t.fontWeight === '700' ? 1 : 0;
     const spacing = parseFloat(t.letterSpacing) || 0;
 
-    const isAliAbdaal = key === 'aliAbdaal';
     const hasBox = !!t.background;
-    // Ali Abdaal: BorderStyle 1 (no box from ASS) — we can't easily do white pill box
-    // in ASS, so we use BorderStyle 1 with white outline as a fake box border.
-    // The white box render is approximated with OutlineColour=white and larger outline.
-    const borderStyle = isAliAbdaal ? 1 : hasBox ? 3 : 1;
+    // For Ali Abdaal: Use BorderStyle 3 (box) with rounded corners via border/shadow
+    // For other themes: use their original border styles
+    const borderStyle = isAliAbdaal ? 3 : (hasBox ? 3 : 1);
     const outline = isAliAbdaal
-      ? 8   // thick white outline approximates the box
-      : hasBox ? 10 : ((t.strokeWidth ?? 2) / 2);
-    const shadow = isAliAbdaal ? 0 : hasBox ? 0 : 1;
-    // For Ali Abdaal, OutlineColour = white (approximates the box)
+      ? 15   // Larger outline for smoother rounded effect
+      : (hasBox ? 10 : ((t.strokeWidth ?? 2) / 2));
+    const shadow = isAliAbdaal ? 4 : (hasBox ? 0 : 1);
+    // For Ali Abdaal: white background (via large outline), dark text
     const outlineColor = isAliAbdaal
-      ? hexToAssBGR('#FFFFFF')
+      ? hexToAssBGR('#FFFFFF')  // white outline creates the pill background
       : hasBox
       ? hexToAssBGR(t.background)
       : hexToAssBGR(rst.stroke ?? t.stroke);
-    const backColor = isAliAbdaal ? '&H00FFFFFF' : '&H80000000';
+    const backColor = isAliAbdaal
+      ? hexToAssBGR('#FFFFFF') // white background for box style
+      : hasBox
+      ? hexToAssBGR(t.background) // Use theme background color for other boxes
+      : '&H80000000'; // transparent for non-box styles
+    const secondaryAss = isAliAbdaal ? hexToAssBGR(t.secondaryColor || '#9CA3AF') : '&H000000FF';
 
     return `Style: ${key},${fontName},${fs},${primaryColor},&H000000FF,${outlineColor},${backColor},${bold},0,0,0,100,100,${spacing},0,${borderStyle},${outline},${shadow},2,10,10,30,1`;
   }).join('\n');
@@ -214,54 +218,24 @@ export const subtitlesToAss = (subtitles, vw = 1920, vh = 1080) => {
         overrides.push(`\\3c${hexToAssColor(st.stroke)}`);
       }
 
-      // ── Ali Abdaal: word-by-word color switch gray → black ──────────
-      // Each word starts in gray (secondaryColor), then at the word's start
-      // time instantly switches to dark (activeColor). We emit one Dialogue
-      // line per word with colour override so libass/FFmpeg renders it right.
-      // This produces: past words = dark, current word = dark, future = gray.
+      // ── Ali Abdaal: Force white box with rounded corners using BorderStyle 3 ─────
       if (themeKey === 'aliAbdaal') {
-        const activeAss    = hexToAssColor(theme.activeColor    || '#111111');
-        const secondaryAss = hexToAssColor(theme.secondaryColor || '#9CA3AF');
-
-        const wordItems = Array.isArray(sub.words) && sub.words.length
-          ? sub.words
-          : (() => {
-              const tokens = text.split(/\s+/).filter(Boolean);
-              const dur = sub.end - sub.start;
-              return tokens.map((w, i) => ({
-                word: w,
-                start: sub.start + (dur * i) / Math.max(tokens.length, 1),
-                end: i === tokens.length - 1
-                  ? sub.end
-                  : sub.start + (dur * (i + 1)) / Math.max(tokens.length, 1),
-              }));
-            })();
-
-        // Strategy: output the full caption once, coloring each word based on
-        // whether it is before, at, or after the active word.
-        // We approximate this with \k karaoke: each word emits a \k tag for
-        // its duration. Before its time it uses secondaryColor, during/after
-        // it uses activeColor (\kf sweeps primary→secondary, use \k for instant).
-        //
-        // Exact approach: all words start grey (\1c secondary). Then for each
-        // word position we emit a \k block. As karaoke time ticks through,
-        // the word at the front gets the primary colour automatically.
-        // We set Primary = activeColor, Secondary = secondaryColor in the
-        // style so that \k correctly switches from secondary to primary.
-        const kText = wordItems
-          .map((w) => {
-            const durCs = Math.max(1, Math.round((w.end - w.start) * 100));
-            const word = String(w.word ?? w.text ?? '').trim();
-            // \ko = clear, then primary; all unsung = secondary via SecondaryColour
-            return `{\\k${durCs}}${word}`;
-          })
-          .join(' ');
-
-        // Override style: Primary = active (dark), Secondary = gray.
-        // SecondaryColour in the style line is &H000000FF by default;
-        // we override via \2c here.
-        const tags = `{${overrides.join('')}\\1c${secondaryAss}\\2c${activeAss}}`;
-        return `Dialogue: 0,${toAssTime(sub.start)},${toAssTime(sub.end)},${themeKey},,0,0,0,karaoke,${tags}${kText}`;
+        // Use dark text color for all words
+        const activeAss = hexToAssColor(theme.activeColor || '#111111');
+        
+        // Force white box with smoother rounded effect
+        const aliOverrides = [
+          ...overrides,
+          '\\1c' + activeAss,  // dark text
+          '\\3c&HFFFFFF&',    // white outline (blends with background)
+          '\\4c&H00FFFFFF&',  // white background
+          '\\bord15',         // larger outline for smoother corners
+          '\\shad4',          // larger shadow for rounded effect
+          '\\b3'               // BorderStyle 3 (box)
+        ];
+        
+        const tags = `{${aliOverrides.join('')}}`;
+        return `Dialogue: 0,${toAssTime(sub.start)},${toAssTime(sub.end)},${themeKey},,0,0,0,,${tags}${text}`;
       }
 
       // ── Regular themes ─────────────────────────────────────────────

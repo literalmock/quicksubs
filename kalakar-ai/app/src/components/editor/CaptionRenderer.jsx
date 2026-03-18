@@ -49,9 +49,12 @@ const CaptionRenderer = ({ subtitle, currentTime = 0, templateKey = 'classic', e
     ? subtitle.words
     : fallbackWords(subtitle);
 
-  const wordLines = (template.wordSplit && !isAliAbdaal
-    ? chunkWordItems(words, template.wordsPerLine ?? 2)
-    : [words]
+  const wordLines = (isAliAbdaal
+    ? [{ startIndex: 0, words: words }] // Force single line for Ali Abdaal
+    : (template.wordSplit && !isAliAbdaal
+      ? chunkWordItems(words, template.wordsPerLine ?? 2)
+      : [words]
+    )
   ).reduce((lines, line) => {
     const startIndex = lines.length
       ? lines[lines.length - 1].startIndex + lines[lines.length - 1].words.length
@@ -76,6 +79,14 @@ const CaptionRenderer = ({ subtitle, currentTime = 0, templateKey = 'classic', e
         template.wordSplit ? 'caption-renderer--stacked' : '',
         isAliAbdaal ? 'caption-renderer--ali-abdaal' : '',
       ].filter(Boolean).join(' ')}
+      style={{
+        ...(isAliAbdaal ? {
+          whiteSpace: 'nowrap',
+          overflow: 'visible',
+          display: 'inline-block',
+          // Removed max-width constraint to allow full text display
+        } : {}),
+      }}
       data-effect={resolvedEffectKey}
       data-theme={resolvedTemplateKey}
     >
@@ -83,6 +94,14 @@ const CaptionRenderer = ({ subtitle, currentTime = 0, templateKey = 'classic', e
         <div
           key={`${subtitle.id ?? 'caption'}-line-${lineIndex}`}
           className={`caption-line ${template.background && !isAliAbdaal ? 'caption-line--boxed' : ''}`}
+          style={{
+            ...(isAliAbdaal ? {
+              whiteSpace: 'nowrap',
+              overflow: 'visible',
+              display: 'inline-block',
+              // Removed max-width constraint to allow full text display
+            } : {}),
+          }}
         >
           {line.words.map((word, wordIndex) => {
             const absoluteIndex = line.startIndex + wordIndex;
@@ -105,7 +124,11 @@ const CaptionRenderer = ({ subtitle, currentTime = 0, templateKey = 'classic', e
             return (
               <span
                 key={`${subtitle.id ?? 'caption'}-${lineIndex}-${wordIndex}-${label}`}
-                style={wordStyle}
+                style={{
+                  ...wordStyle,
+                  display: 'inline-block',
+                  marginRight: '0.2em',
+                }}
                 className={[
                   'caption-word',
                   isActive ? 'active-word' : 'inactive-word',
