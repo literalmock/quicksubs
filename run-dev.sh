@@ -3,9 +3,9 @@
 set -e
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-APP_DIR="$ROOT_DIR/kalakar-ai/app"
-SERVER_DIR="$ROOT_DIR/kalakar-ai/server"
-WORKER_DIR="$ROOT_DIR/kalakar-ai/worker"
+APP_DIR="$ROOT_DIR/clipcaptions/app"
+SERVER_DIR="$ROOT_DIR/clipcaptions/server"
+WORKER_DIR="$ROOT_DIR/clipcaptions/worker"
 
 echo "Starting QuickSubs dev stack (server + worker + app)..."
 
